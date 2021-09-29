@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    depends_on: 
+      elasticsearch: 
+        condition: service_healthy
+      db: 
+        condition: service_healthy
+    environment:
+      STAGE: test
+      SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://test:test@db/test
+      ELASTICSEARCH_URL: "http://elasticsearch:9200"
+    networks:
+      - elastic
+    ports:
+      - 8000:5000
+    restart: always
+    volumes:
+      - ./backend/app:/socinf/app
+      - ./backend/tests:/socinf/tests
+  db:
+    image: postgres:latest
+    container_name: db
+    environment:
+        POSTGRES_USER: test
+        POSTGRES_PASSWORD: test
+        POSTGRES_DB: test
+    healthcheck:
+      test: pg_isready -U test -D test > /dev/null; if [[ $$? == 0 ]]; then echo 0; else echo 1; fi
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - elastic
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+  elasticsearch:
+    build: ./elasticsearch
+    volumes:
+     - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - xpack.license.self_generated.type=trial
+      # - ELASTIC_PASSWORD=elastic
+      # - ELASTIC_USERNAME=elastic
+      - ES_JAVA_OPTS=-Xmx256m -Xms256m
+    networks:
+      - elastic
+    healthcheck:
+      test: curl http://localhost:9200 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  elastic:
+    driver: bridge
