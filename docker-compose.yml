@@ -19,8 +19,8 @@ services:
       - 8000:5000
     restart: always
     volumes:
-      - ./backend/app:/socinf/app
-      - ./backend/tests:/socinf/tests
+      - ./backend/app:/malware_analyse/app
+      - ./backend/tests:/malware_analyse/tests
   db:
     image: postgres:latest
     container_name: db

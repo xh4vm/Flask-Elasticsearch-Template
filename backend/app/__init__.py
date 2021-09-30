@@ -12,8 +12,8 @@ redis_client = FlaskRedis()
 celery = Celery(__name__, backend=Config.CELERY_RESULT_BACKEND, broker=Config.CELERY_BROKER_URL)
 
 def register_blueprints(app):
-    from app.home import bp as home_bp
-    app.register_blueprint(home_bp)
+    from app.ntfs import bp as ntfs_bp
+    app.register_blueprint(ntfs_bp)
 
 
 def create_app(config_class=Config):
@@ -28,6 +28,7 @@ def create_app(config_class=Config):
     app.app_context().push()
 
     return app
+    
 
 def make_celery(app):
     celery = Celery(
