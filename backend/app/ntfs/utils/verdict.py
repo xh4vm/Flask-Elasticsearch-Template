@@ -1,8 +1,8 @@
 import json
-from types import Tuple
-from ..db import db
+from typing import Tuple
+from ...db import db
 from sqlalchemy.orm.scoping import scoped_session
-from .models import AVVerdict, ObjectInfo
+from ..models import AVVerdict, AVInfo
 
 
 class Verdict:
@@ -28,27 +28,26 @@ class Verdict:
 
         if ptc is not None:
             result = ptc.get('popular_threat_category'), ptc.get('popular_threat_name')
-
+            
         return result
 
-    def add_object_info(object_id : int) -> None:
+    def add_av_info(self) -> None:
         popular_threat_category, popular_threat_name = self._popular_threat_classification()
 
-        object_info = ObjectInfo(object_id=object_id, 
-            type_description=self.attributes.get('type_description'), packer=self._get_packer(), 
-            autostart_locations=json.loads(self.attributes.get('autostart_locations')), creation_date=self.attributes.get('creation_date'),
-            meaningful_name=self.attributes.get('meaningful_name'), popular_threat_category=popular_threat_category,
-            popular_threat_name=popular_threat_name, status=self._get_status())
+        av_info = AVInfo( type_description=self.attributes.get('type_description'), packer=self._get_packer(), 
+            autostart_locations=self.attributes.get('autostart_locations'), creation_date=self.attributes.get('creation_date'),
+            names=self.attributes.get('names'), popular_threat_category=popular_threat_category,
+            popular_threat_name=popular_threat_name, status=getattr(AVInfo, self._get_status().upper()))
         
-        self.session.add(object_info)
+        self.session.add(av_info)
         self.session.commit()
 
-    def add_analysis_results(object_id : int) -> None:
+    def add_analysis_results(self) -> None:
         analysis_results = self.attributes['last_analysis_results']
 
-        for analyse_result in analysis_results:
+        for analyse_result in analysis_results.values():
 
-            av_verdict = AVVerdict(object_id=object_id, category=analyse_result['category'], engine_name=analyse_result['engine_name'], 
+            av_verdict = AVVerdict(category=analyse_result['category'], engine_name=analyse_result['engine_name'], 
                 engine_version=analyse_result['engine_version'], result=analyse_result['result'], method=analyse_result['method'], 
                 engine_update=analyse_result['engine_update'])
 
