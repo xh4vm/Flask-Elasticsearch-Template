@@ -3,6 +3,7 @@ import json
 from ..db import db
 from flask import jsonify
 from sqlalchemy.orm.scoping import scoped_session
+from sqlalchemy.sql import func
 from flask_classy import FlaskView, route
 from app.decorators import request_validation_required
 from .schemas import post_hash_schema

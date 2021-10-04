@@ -134,8 +134,8 @@ class  AVVerdict(Model, ElasticsearchMixin):
     engine_name = Column(String(128), nullable=False)
     engine_version = Column(String(128), nullable=True)
     result = Column(String(128), nullable=True)
-    method = Column(String(128), nullable=True)
-    engine_update = Column(String(128), nullable=True)
+    method = Column(String(4096), nullable=True)
+    engine_update = Column(String(4096), nullable=True)
 
     elastic_body=['category', 'engine_name', 'engine_version', 'result', 'method', 'engine_update']
 

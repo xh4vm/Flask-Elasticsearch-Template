@@ -28,7 +28,7 @@ class Verdict:
 
         if ptc is not None:
             result = ptc.get('popular_threat_category'), ptc.get('popular_threat_name')
-
+            
         return result
 
     def add_analysis_results(self, hash_id : int) -> None:
