@@ -38,6 +38,10 @@ pg:
 clean-pyc:
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 
-.PHONY: clean docker
-clean:
+.PHONY: clean all docker images
+clean-all:
 	T=$$(docker ps -q); docker stop $$T; docker rm $$T; docker container prune -f
+
+.PHONY: clean docker images
+clean:
+	T="backend db elasticsearch"; docker stop $$T; docker rm $$T; docker container prune -f

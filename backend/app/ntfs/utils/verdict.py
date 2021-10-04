@@ -1,8 +1,8 @@
 import json
-from types import Tuple
-from ..db import db
+from typing import Tuple
+from ...db import db
 from sqlalchemy.orm.scoping import scoped_session
-from .models import AVVerdict, ObjectInfo
+from ..models import AVVerdict, AVInfo, Hash, ObjectAssociate, VerdictAssociate
 
 
 class Verdict:
@@ -31,26 +31,56 @@ class Verdict:
 
         return result
 
-    def add_object_info(object_id : int) -> None:
-        popular_threat_category, popular_threat_name = self._popular_threat_classification()
+    def add_analysis_results(self, hash_id : int) -> None:
+        status = getattr(AVInfo, self._get_status().upper())
 
-        object_info = ObjectInfo(object_id=object_id, 
-            type_description=self.attributes.get('type_description'), packer=self._get_packer(), 
-            autostart_locations=json.loads(self.attributes.get('autostart_locations')), creation_date=self.attributes.get('creation_date'),
-            meaningful_name=self.attributes.get('meaningful_name'), popular_threat_category=popular_threat_category,
-            popular_threat_name=popular_threat_name, status=self._get_status())
+        if status in [AVInfo.MALICIOUS, AVInfo.SUSPICIOUS]:
+            self.add_object_info(hash_id=hash_id)
+            self.add_antivirus_results(hash_id=hash_id)
+
+    def add_object_info(self, hash_id : int) -> None:
+        popular_threat_category, popular_threat_name = self._popular_threat_classification()
+        status = getattr(AVInfo, self._get_status().upper())
+
+        _av_info = AVInfo(type_description=self.attributes.get('type_description'), packer=self._get_packer(), 
+            autostart_locations=self.attributes.get('autostart_locations'), creation_date=self.attributes.get('creation_date'),
+            popular_threat_category=popular_threat_category, popular_threat_name=popular_threat_name, status=status)
         
-        self.session.add(object_info)
+        av_info = _av_info.add()
+
+        object_associate = ObjectAssociate(hash_id=hash_id, av_info_id=av_info.id)
+
+        self.session.add(object_associate)
         self.session.commit()
 
-    def add_analysis_results(object_id : int) -> None:
+        # d = {}
+        # for column in av_info.__table__.columns:
+        #     d[column.name] = str(getattr(av_info, column.name))
+
+        # print(d)
+        # raise Exception
+        
+    def add_antivirus_results(self, hash_id : int) -> None:
         analysis_results = self.attributes['last_analysis_results']
 
-        for analyse_result in analysis_results:
+        for analyse_result in analysis_results.values():
 
-            av_verdict = AVVerdict(object_id=object_id, category=analyse_result['category'], engine_name=analyse_result['engine_name'], 
+            _av_verdict = AVVerdict(category=analyse_result['category'], engine_name=analyse_result['engine_name'], 
                 engine_version=analyse_result['engine_version'], result=analyse_result['result'], method=analyse_result['method'], 
                 engine_update=analyse_result['engine_update'])
 
-            self.session.add(av_verdict)
+            av_verdict = _av_verdict.add()
+
+            verdict_associate = VerdictAssociate(hash_id=hash_id, av_verdict_id=av_verdict.id)
+
+            self.session.add(verdict_associate)
             self.session.commit()
+
+        # ds = []
+        # for a in AVVerdict.query.all():
+        #     d = {}
+        #     for column in a.__table__.columns:
+        #         d[column.name] = str(getattr(a, column.name))
+        #     ds.append(d)
+        # print(ds)
+        # raise Exception

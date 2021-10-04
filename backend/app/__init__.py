@@ -1,14 +1,17 @@
 from celery import Celery
 from config import Config
-from .flask_elastic import FlaskElastic
+from .extensions.flask_elastic import FlaskElastic
+from .extensions.flask_celery import FlaskCelery
 from flask_migrate import Migrate
 from flask_redis import FlaskRedis
+import os
 
 
 from .db import db
 
 migrate = Migrate()
 redis_client = FlaskRedis()
+# celery = Celery(__name__, backend=os.environ.get('CELERY_RESULT_BACKEND'), broker=os.environ.get('CELERY_BROKER_URL'))
 celery = Celery(__name__, backend=Config.CELERY_RESULT_BACKEND, broker=Config.CELERY_BROKER_URL)
 
 def register_blueprints(app):
@@ -22,6 +25,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     redis_client.init_app(app)
+    # celery.init_app(app)
 
     register_blueprints(app)
 
@@ -33,6 +37,8 @@ def create_app(config_class=Config):
 def make_celery(app):
     celery = Celery(
         app.import_name,
+        # backend=os.environ.get('CELERY_RESULT_BACKEND'),
+        # broker=os.environ.get('CELERY_BROKER_URL')
         backend=app.config['CELERY_RESULT_BACKEND'],
         broker=app.config['CELERY_BROKER_URL']
     )

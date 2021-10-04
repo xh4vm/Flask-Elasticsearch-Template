@@ -1,4 +1,3 @@
-from app.project.models import Project, create_author_project
 from flask_testing import TestCase
 from sqlalchemy.orm.scoping import scoped_session
 
