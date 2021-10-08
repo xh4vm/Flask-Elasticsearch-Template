@@ -16,11 +16,11 @@ run:
 
 .PHONY: test
 test:
-	docker exec -it backend pytest -vv --cov=app/ 
+	docker exec -it backend venv/bin/pytest -vv --cov=app/ 
 
 .PHONY: migrate
 migrate:
-	docker exec -it backend flask db migrate && flask db upgrade
+	docker exec -it backend venv/bin/flask db migrate && flask db upgrade
 
 .PHONY: cli
 cli:

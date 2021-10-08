@@ -1,18 +1,17 @@
-from celery import Celery
+# from celery import Celery
 from config import Config
 from .extensions.flask_elastic import FlaskElastic
-from .extensions.flask_celery import FlaskCelery
 from flask_migrate import Migrate
 from flask_redis import FlaskRedis
-import os
-
-
+# from flask import Flask
+# import asyncio
 from .db import db
+
 
 migrate = Migrate()
 redis_client = FlaskRedis()
-# celery = Celery(__name__, backend=os.environ.get('CELERY_RESULT_BACKEND'), broker=os.environ.get('CELERY_BROKER_URL'))
-celery = Celery(__name__, backend=Config.CELERY_RESULT_BACKEND, broker=Config.CELERY_BROKER_URL)
+# celery = Celery(__name__, backend=Config.CELERY_RESULT_BACKEND, broker=Config.CELERY_BROKER_URL)
+# loop = asyncio.get_event_loop()
 
 def register_blueprints(app):
     from app.ntfs import bp as ntfs_bp
@@ -25,7 +24,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     redis_client.init_app(app)
-    # celery.init_app(app)
+    # celery.conf.update(app.config)
 
     register_blueprints(app)
 
@@ -34,20 +33,19 @@ def create_app(config_class=Config):
     return app
     
 
-def make_celery(app):
-    celery = Celery(
-        app.import_name,
-        # backend=os.environ.get('CELERY_RESULT_BACKEND'),
-        # broker=os.environ.get('CELERY_BROKER_URL')
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
-    )
-    celery.conf.update(app.config)
+# def make_celery(app):
+#     celery = Celery(
+#         app.import_name,
+#         backend=app.config['CELERY_RESULT_BACKEND'],
+#         broker=app.config['CELERY_BROKER_URL']
+#     )
+#     celery.conf.update(app.config)
 
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
+#     class ContextTask(celery.Task):
+#         def __call__(self, *args, **kwargs):
+#             with app.app_context():
+#                 return self.run(*args, **kwargs)
 
-    celery.Task = ContextTask
-    return celery
+#     celery.Task = ContextTask
+#     celery.config_from_object(__name__)
+#     return celery

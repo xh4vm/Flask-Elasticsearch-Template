@@ -1,24 +1,50 @@
-from flask import current_app
 import requests
 import json
-from app import celery 
-from .models import Hash
-from .utils.verdict import Verdict
-from ..db import db
+from app.ntfs.utils.verdict import Verdict
+from app.ntfs.models import *
+import json
+
+try:
+    import uwsgi
+    from uwsgidecorators import spool 
+    UWSGI = True
 
 
-@celery.task
-def get_virustotal_verdict(hash : dict, vt_api_url : str, vt_headers : str):
-    with current_app.test_request_context():
-        with current_app.app_context():
-            db.session.commit()
+    def prepare_spooler_args(**kwargs):  # maybe spool(pass_arguments=True)
+        args = {}
+        for name, value in kwargs.items():
+            args[name.encode('utf-8')] = str(value).encode('utf-8')
+        return args
 
-            id, md5 = hash.get('id'), hash.get('md5')
-            response = requests.get(f"{vt_api_url}/{md5}", headers=vt_headers)
+    @spool
+    def get_virustotal_verdict(args : dict):
+        # try:
+        id, md5 = args['id'], args['md5']
+        print("FROM", id, md5)
+        response = requests.get(f"{args['vt_api_url']}/{md5}", headers=json.loads(args['vt_headers']))
 
-            verdict_data = json.loads(response.text)
-            
-            verdict = Verdict(verdict_data)
-            verdict.add_analysis_results(hash_id=id)
+        verdict_data = json.loads(response.text)
 
-            return Hash.query.all()
+        verdict = Verdict(verdict_data)
+        verdict.add_analysis_results(hash_id=id)
+
+        print(Hash.query.all())
+        print(Object.query.all())
+        print(ObjectAssociate.query.all())
+        print(AVInfo.query.all())
+        print(AVVerdict.query.all())
+
+        return uwsgi.SPOOL_OK
+        # except:
+        #     return uwsgi.SPOOL_RETRY
+except:
+    UWSGI = False
+
+    def get_virustotal_verdict(args : dict):
+        id, md5 = args['hash'].get('id'), args['hash'].get('md5')
+        response = requests.get(f"{args['vt_api_url']}/{md5}", headers=args['vt_headers'])
+
+        verdict_data = json.loads(response.text)
+
+        verdict = Verdict(verdict_data)
+        verdict.add_analysis_results(hash_id=id)

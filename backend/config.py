@@ -12,8 +12,11 @@ class BaseConfig:
 
     ELASTICSEARCH_URL = "http://localhost:9200"
 
-    CELERY_BROKER_URL = 'redis://localhost:6379/0'
-    CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+    # CELERY_BROKER_URL = 'redis://localhost:6379/0'
+    # CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+    # BROKER_URL = 'redis://localhost:6379/0'
+    # RESULT_BACKEND = 'redis://localhost:6379/0'
 
 
 class DeployConfig(BaseConfig):
