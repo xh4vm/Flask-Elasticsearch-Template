@@ -12,8 +12,20 @@ class Index:
         if not current_app.elasticsearch:
             raise DBExceptions('Elasticsearch not found')
 
+    def add_if_not_exists(self, model : object):
+        indices = current_app.elasticsearch.indices.get('*')
+
+        if model.__tablename__ in indices:
+            return False
+
+        current_app.elasticsearch.indices.create(index=self.index, body={})
+        
+        return True
+
     def add(self, model : object) -> None:
         payload = {field : getattr(model, field) for field in getattr(model, model.__searchable__)}
+        
+        # current_app.elasticsearch.indices.create(index=self.index, body=payload)
         current_app.elasticsearch.index(index=self.index, doc_type=self.index, id=model.id, body=payload)
 
     def remove(self, model : object) -> None:

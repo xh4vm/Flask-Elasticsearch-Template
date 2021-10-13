@@ -10,7 +10,7 @@ try:
     UWSGI = True
 
 
-    def prepare_spooler_args(**kwargs):  # maybe spool(pass_arguments=True)
+    def prepare_spooler_args(**kwargs):
         args = {}
         for name, value in kwargs.items():
             args[name.encode('utf-8')] = str(value).encode('utf-8')
@@ -20,23 +20,23 @@ try:
     def get_virustotal_verdict(args : dict):
         # try:
         id, md5 = args['id'], args['md5']
-        print("FROM", id, md5)
+
         response = requests.get(f"{args['vt_api_url']}/{md5}", headers=json.loads(args['vt_headers']))
+
+        print(response.status_code)
+        if response.status_code == 404:
+            return uwsgi.SPOOL_OK
 
         verdict_data = json.loads(response.text)
 
         verdict = Verdict(verdict_data)
         verdict.add_analysis_results(hash_id=id)
 
-        print(Hash.query.all())
-        print(Object.query.all())
-        print(ObjectAssociate.query.all())
-        print(AVInfo.query.all())
-        print(AVVerdict.query.all())
 
         return uwsgi.SPOOL_OK
         # except:
         #     return uwsgi.SPOOL_RETRY
+
 except:
     UWSGI = False
 

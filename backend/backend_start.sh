@@ -7,7 +7,7 @@ flask db upgrade
 # celery -A celery_worker.celery worker &
 
 service nginx start
-venv/bin/uwsgi --ini uwsgi.ini
+uwsgi --ini uwsgi.ini
 
 # Только для процесса разработки!
 # Изменение кода будет инициировать перезагрузку сервиса

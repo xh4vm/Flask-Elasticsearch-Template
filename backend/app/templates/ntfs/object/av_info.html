@@ -1,0 +1,103 @@
+<section>
+    <div class="container">
+
+        <!-- job -->
+        <h3 class="h5 border-bottom pb-3 mb-4">
+            <span class="text-primary">VirusTotal.</span> Основная информация
+        </h3>
+
+        <p class="lead">
+            Антивирусный анализ с помощью сервиса VirusTotal
+        </p>
+
+        <div class="row col-border mt-5">
+            <div class="col-12 col-lg-6">
+
+                <h5 class="font-weight-light mb-3">Информация о файле</h5>
+
+                <ul class="list-unstyled list-icons mb-5">
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">Путь:</span> {{object.path}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">MD5 хеш:</span> {{object.hash.md5}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">SHA1 хеш:</span> {{object.hash.sha1}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">SHA256 хеш:</span> {{object.hash.sha256}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">Дата создания:</span> {{object.creation_time}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">Дата модификации:</span> {{object.last_write_time}}
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <div class="col-12 col-lg-6">
+
+                <h5 class="font-weight-light mb-3">Информация о сигнатуре</h5>
+                
+                <ul class="list-unstyled list-icons mb-5">
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        </div> <span class="text-primary">Тип файла:</span> {{av_info.type_description}}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        </div> <span class="text-primary">Упаковщик:</span> {{av_info.packer}}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        </div> <span class="text-primary">Реестр:</span> {{av_info.autostart_locations}}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        </div> <span class="text-primary">Теги:</span> {{av_info.popular_threat_name}}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        </div> <span class="text-primary">Категории:</span> {{av_info.popular_threat_category}}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        </div> <span class="text-primary">Статус:</span> {% if av_info.status == 106107 %} <span class="text-danger">ВИРУС</span> {% elif av_info.status == 106103 %} <span class="text-warning">ПОДОЗРИТЕЛЬНЫЙ</span> {% elif av_info.status == 106108 %} <span class="text-secondary">ЗАРАЖЕНИЯ НЕ ОБНАРУЖЕНО</span> {% endif %}
+                    </li>
+
+                </ul>
+
+            </div>
+        </div>
+
+    </div>
+</section>

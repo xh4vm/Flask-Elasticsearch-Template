@@ -5,12 +5,19 @@ from .index import Index
 
 
 class ElasticsearchMixin(object):
+
+    @classmethod
+    def add_if_not_exists(cls):
+        return Index(cls.__tablename__).add_if_not_exists(cls)
+
     @classmethod
     def search(cls, expression : str, fields : List[str]) -> Tuple[BaseQuery, int]:
+        Index(cls.__tablename__).add_if_not_exists(cls)
         ids, total = Index(cls.__tablename__).query(expression, fields)
-        when = [(ids[i], i) for i in range(len(ids))]
-        
-        return cls.query.filter(cls.id.in_(ids)).order_by(db.case(when, value=cls.id)).all(), total['value']
+        # when = [(ids[i], i) for i in range(len(ids))]
+
+        # r = cls.query.filter(cls.id.in_(ids)).order_by(db.case(when, value=cls.id)).all(), total['value']
+        return cls.query.filter(cls.id.in_(ids)).all(), total['value']
 
     @classmethod
     def before_commit(cls, session : dict) -> None:

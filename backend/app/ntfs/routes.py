@@ -1,24 +1,26 @@
 import requests
 import json
 from ..db import db
-from flask import jsonify
+from flask import jsonify, render_template
 from sqlalchemy.orm.scoping import scoped_session
 from sqlalchemy.sql import func
 from flask_classy import FlaskView, route
 from app.decorators import request_validation_required
+from .decorators import fingerprint_required, object_required
 from .schemas import post_hash_schema
 from app.utils.request_type.JSON import JSON
-from .models import Hash, Object, AVInfo, AVVerdict, Fingerprint, ObjectAssociate
+from .models import Hash, Object, AVInfo, AVVerdict, Fingerprint, HashAssociate, VerdictAssociate, NotVerifiedVirus
 from .serializers import serialize_hash
-# from app.tasks import *
-from .tasks import get_virustotal_verdict, prepare_spooler_args
+from .tasks import get_virustotal_verdict
+from sqlalchemy.sql.expression import null
+from itertools import chain
+from .utils.enrichment.virus_shares import VirusShares
 
+try:
+    from .tasks import prepare_spooler_args
+except:
+    pass
 
-# def prepare_spooler_args(**kwargs):  # maybe spool(pass_arguments=True)
-#     args = {}
-#     for name, value in kwargs.items():
-#         args[name.encode('utf-8')] = str(value).encode('utf-8')
-#     return args
 
 class NTFS(FlaskView):
     session: scoped_session = db.session
@@ -26,28 +28,55 @@ class NTFS(FlaskView):
     vt_headers = {'x-apikey' : 'a13a8e8e39c0b2a66bbd36dc2256467a9e692ca471391fd26a7edd7b1bb1163e'}
 
     def get(self):
-        print(Hash.query.all())
-        print(Object.query.all())
-        print(ObjectAssociate.query.all())
-        print(AVInfo.query.all())
-        print(AVVerdict.query.all())
+        fingerprint_data = (Fingerprint.query
+            .with_entities(*Fingerprint.__table__.columns, func.count(Object.id).label('count_objects'))
+            .filter(Fingerprint.id == Object.fingerprint_id)
+            .group_by(Fingerprint.id)
+            .all())
         
-        return jsonify(), 200
+        return render_template("ntfs/index.html", fingerprint_data=fingerprint_data), 200
 
-    # def post(self):
-    #     args = prepare_spooler_args(duration=15)
-    #     spool_task.spool(args)
-    #     return jsonify({'started': True})
-    #     # object = Object.query.all()
-    #     # object_info = AVInfo.query.all()
-    #     # analysis = AVVerdict.query.all()
+    @fingerprint_required
+    @route('/<int:fingerprint_id>/', methods=['GET'])
+    def by_fingerprint(self, fingerprint : Fingerprint):
+        objects_with_status = (Object
+                    .query
+                    .with_entities(*Object.__table__.columns, Hash.md5, Hash.sha1, Hash.sha256, AVInfo.status)
+                    .filter(Object.fingerprint_id == fingerprint.id, Hash.id == Object.hash_id, AVInfo.id == HashAssociate.av_info_id,
+                        HashAssociate.hash_id == Object.hash_id))
 
-    #     # return jsonify({"object": object, "object_info": object_info, "analysis": analysis}), 200
+        objects = (Object
+                    .query
+                    .with_entities(*Object.__table__.columns, Hash.md5, Hash.sha1, Hash.sha256, null().label('status'))
+                    .filter(
+                        Object.fingerprint_id == fingerprint.id, Hash.id == Object.hash_id,
+                        ~Object.hash_id.in_(
+                            chain(*self.session.query(HashAssociate.hash_id).all())
+                        )
+                    )
+                    .union(objects_with_status)
+                    .all())
+
+        return render_template("ntfs/host.html", objects=objects), 200
+
+    @fingerprint_required
+    @object_required
+    @route('/<int:fingerprint_id>/<int:object_id>/', methods=['GET'])
+    def by_object(self, fingerprint : Fingerprint, object : Object):
+        av_info = (AVInfo.query
+            .filter(AVInfo.id == HashAssociate.av_info_id, HashAssociate.hash_id == object.hash_id)
+            .first())
+        
+        av_verdict = (AVVerdict.query
+            .filter(AVVerdict.id == VerdictAssociate.av_verdict_id, VerdictAssociate.hash_id == object.hash_id)
+            .order_by(AVVerdict.category)
+            .all())
+
+        return render_template("ntfs/object/index.html", object=object, av_info=av_info, av_verdict=av_verdict), 200
 
     @request_validation_required(schema=post_hash_schema, req_type=JSON)
     @route('/hash/', methods=['POST'])
     def hash(self, validated_request : dict):
-        
 
         f = validated_request['fingerprint']
         fingerprint = Fingerprint(serial_number=f.get('serial_number'), computer_name=f.get('computer_name'), 
@@ -56,23 +85,26 @@ class NTFS(FlaskView):
         h = validated_request['hashes']
         hash = Hash(md5=h.get('md5'), sha1=h.get('sha1'), sha256=h.get('sha256')).add()
         
-        Object(fingerprint_id=fingerprint.id, hash_id=hash.id, path=validated_request.get('path'),
+        Object(fingerprint_id=fingerprint.id, hash_id=hash.id, path=validated_request.get('path'), trusted=validated_request.get('trusted'),
             creation_time=validated_request.get('creation_time'), last_write_time=validated_request.get('last_write_time')).add()
         
-        # task = get_virustotal_verdict.delay(hash=serialize_hash(hash), vt_api_url=self.vt_api_url, vt_headers=self.vt_headers)
-        # result = task.wait(timeout=None, interval=0.5)
-        
-        args = prepare_spooler_args(id=hash.id, md5=hash.md5, vt_api_url=self.vt_api_url, vt_headers=json.dumps(self.vt_headers))
-        get_virustotal_verdict.spool(args)
-
-        # args = prepare_spooler_args(duration=5)
-        # spool_task.spool(args)
-
-        # print(result)
-        print(Hash.query.all())
-        print(Object.query.all())
-        print(ObjectAssociate.query.all())
-        print(AVInfo.query.all())
-        print(AVVerdict.query.all())
+        # if not validated_request.get('trusted'):
+        if NotVerifiedVirus.query.filter_by(hash_id=hash.id).first() is not None:
+            args = prepare_spooler_args(id=hash.id, md5=hash.md5, vt_api_url=self.vt_api_url, vt_headers=json.dumps(self.vt_headers))
+            get_virustotal_verdict.spool(args)
 
         return jsonify(), 202
+
+    @route('/hash/enrichment/virus_shares/', methods=['GET'])
+    def get_hashes_virus_shares(self):
+        virus_shares = VirusShares()
+
+        link_pages = virus_shares.get_link_pages()
+
+        for link_page in link_pages:
+            hashes = virus_shares.get_hash_from_page(link_page)
+
+            for md5 in hashes:
+                NotVerifiedVirus.add_hash(md5=md5)
+
+        return {"status": True}, 200

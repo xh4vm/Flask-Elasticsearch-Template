@@ -1,21 +1,39 @@
 from functools import wraps
-from .models import ObjectFS
+from .models import Fingerprint, Object
 from flask import jsonify, request
 
 
-def object_fs_required(f):
+def fingerprint_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'object_fs_id' not in kwargs:
+        if 'fingerprint_id' not in kwargs:
             abort(400)
 
-        object_fs = ObjectFS.query.get(kwargs['object_fs_id'])
+        fingerprint = Fingerprint.query.get(kwargs['fingerprint_id'])
 
-        if object_fs is None:
+        if fingerprint is None:
             abort(404)
 
-        kwargs['object_fs'] = object_fs
-        del kwargs['object_fs_id']
+        kwargs['fingerprint'] = fingerprint
+        del kwargs['fingerprint_id']
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+def object_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'object_id' not in kwargs:
+            abort(400)
+
+        _object = Object.query.get(kwargs['object_id'])
+
+        if _object is None:
+            abort(404)
+
+        kwargs['object'] = _object
+        del kwargs['object_id']
 
         return f(*args, **kwargs)
 

@@ -3,17 +3,17 @@ from config import Config
 from .extensions.flask_elastic import FlaskElastic
 from flask_migrate import Migrate
 from flask_redis import FlaskRedis
-# from flask import Flask
-# import asyncio
 from .db import db
 
 
 migrate = Migrate()
 redis_client = FlaskRedis()
 # celery = Celery(__name__, backend=Config.CELERY_RESULT_BACKEND, broker=Config.CELERY_BROKER_URL)
-# loop = asyncio.get_event_loop()
 
 def register_blueprints(app):
+    from app.home import bp as home_bp
+    app.register_blueprint(home_bp)
+
     from app.ntfs import bp as ntfs_bp
     app.register_blueprint(ntfs_bp)
 

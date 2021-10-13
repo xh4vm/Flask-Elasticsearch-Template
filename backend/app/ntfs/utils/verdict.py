@@ -2,7 +2,7 @@ import json
 from typing import Tuple
 from ...db import db
 from sqlalchemy.orm.scoping import scoped_session
-from ..models import AVVerdict, AVInfo, Hash, ObjectAssociate, VerdictAssociate
+from ..models import AVVerdict, AVInfo, Hash, HashAssociate, VerdictAssociate
 
 
 class Verdict:
@@ -15,9 +15,11 @@ class Verdict:
     ## TODO
     def _get_status(self) -> int:
         last_analysis_stats = self.attributes['last_analysis_stats']
-        _status = max(last_analysis_stats.values())
+        print(last_analysis_stats)
 
-        return list(last_analysis_stats.keys())[list(last_analysis_stats.values()).index(_status)]
+        return 'malicious' if last_analysis_stats['malicious'] > 0 else 'suspicious' if last_analysis_stats['suspicious'] > 0 else 'undetected'
+        # _status = max(last_analysis_stats.values())
+        # return list(last_analysis_stats.keys())[list(last_analysis_stats.values()).index(_status)]
 
     def _get_packer(self) -> str:
         return self.attributes['packers'].get('PEiD') if self.attributes.get('packers') is not None else None
@@ -48,9 +50,9 @@ class Verdict:
         
         av_info = _av_info.add()
 
-        object_associate = ObjectAssociate(hash_id=hash_id, av_info_id=av_info.id)
+        hash_associate = HashAssociate(hash_id=hash_id, av_info_id=av_info.id)
 
-        self.session.add(object_associate)
+        self.session.add(hash_associate)
         self.session.commit()
 
         # d = {}

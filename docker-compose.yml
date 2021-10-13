@@ -53,6 +53,7 @@ services:
       # - ELASTIC_PASSWORD=elastic
       # - ELASTIC_USERNAME=elastic
       - ES_JAVA_OPTS=-Xmx256m -Xms256m
+      - action.auto_create_index=+fingerprints*, +hashes*, +not_verified_viruses*, +objects*, +hash_associates*, +av_infos*, +verdict_associates*, +av_verdicts*
     networks:
       - elastic
     healthcheck:

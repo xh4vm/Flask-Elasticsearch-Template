@@ -1,0 +1,25 @@
+<section class="pb-0">
+    <div class="container">
+
+        <div class="text-center">
+            {% if av_info.status == 106107 %} 
+                <span class="badge badge-pill badge-danger badge-soft font-weight-light pl-2 pr-2 pt--6 pb--6 mb-2">
+                    ВИРУС
+                </span>
+            {% elif av_info.status == 106103 %} 
+                <span class="badge badge-pill badge-warning badge-soft font-weight-light pl-2 pr-2 pt--6 pb--6 mb-2">
+                    ПОДОЗРИТЕЛЬНЫЙ
+                </span>
+            {% elif av_info.status == 106108 %} 
+                <span class="badge badge-pill badge-secondary badge-soft font-weight-light pl-2 pr-2 pt--6 pb--6 mb-2">
+                    ЗАРАЖЕНИЯ НЕ ОБНАРУЖЕНО
+                </span>
+            {% endif %}
+            
+            <h2 class="font-weight-normal">
+                Анализ файла 
+            </h2>
+        </div>
+
+    </div>
+</section>
