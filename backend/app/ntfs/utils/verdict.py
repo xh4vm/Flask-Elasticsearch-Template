@@ -48,20 +48,13 @@ class Verdict:
             autostart_locations=self.attributes.get('autostart_locations'), creation_date=self.attributes.get('creation_date'),
             popular_threat_category=popular_threat_category, popular_threat_name=popular_threat_name, status=status)
         
-        av_info = _av_info.add()
+        av_info = _av_info.insert_if_not_exists_and_select()
 
         hash_associate = HashAssociate(hash_id=hash_id, av_info_id=av_info.id)
 
         self.session.add(hash_associate)
         self.session.commit()
 
-        # d = {}
-        # for column in av_info.__table__.columns:
-        #     d[column.name] = str(getattr(av_info, column.name))
-
-        # print(d)
-        # raise Exception
-        
     def add_antivirus_results(self, hash_id : int) -> None:
         analysis_results = self.attributes['last_analysis_results']
 
@@ -71,18 +64,9 @@ class Verdict:
                 engine_version=analyse_result['engine_version'], result=analyse_result['result'], method=analyse_result['method'], 
                 engine_update=analyse_result['engine_update'])
 
-            av_verdict = _av_verdict.add()
+            av_verdict = _av_verdict.insert_if_not_exists_and_select()
 
             verdict_associate = VerdictAssociate(hash_id=hash_id, av_verdict_id=av_verdict.id)
 
             self.session.add(verdict_associate)
             self.session.commit()
-
-        # ds = []
-        # for a in AVVerdict.query.all():
-        #     d = {}
-        #     for column in a.__table__.columns:
-        #         d[column.name] = str(getattr(a, column.name))
-        #     ds.append(d)
-        # print(ds)
-        # raise Exception

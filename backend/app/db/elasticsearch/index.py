@@ -31,6 +31,16 @@ class Index:
     def remove(self, model : object) -> None:
         current_app.elasticsearch.delete(index=self.index, doc_type=self.index, id=model.id)
 
+    def raw_query(self, body : dict) -> Tuple[list, int]:
+        search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, body=body)
+        return [int(hit['_id']) for hit in search['hits']['hits']], search['hits']['total']
+
+    def query_one(self, args : dict) -> list:
+        search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, 
+            body={'query': {'match': args}, 'size': 1})
+
+        return int(search['hits']['hits'][0]['_id']) if len(search['hits']['hits']) > 0 else None
+
     def query(self, query : str, fields : List[str]) -> Tuple[list, int]:
         search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, 
             body={'query': {'multi_match': {'query': query, 'fields': fields}}})

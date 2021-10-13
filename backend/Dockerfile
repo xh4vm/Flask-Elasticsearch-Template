@@ -2,7 +2,13 @@ FROM python:3.6
 # FROM python:3.9.6
 # FROM python:3.8
 
-RUN apt-get update && apt-get install -y nginx python3-pip build-essential postgresql postgresql-client python3-dev
+RUN apt-get update 
+RUN apt-get install -y nginx 
+RUN apt-get install -y python3-pip
+RUN apt-get install -y build-essential
+RUN apt-get install -y postgresql
+RUN apt-get install -y postgresql-client
+RUN apt-get install -y python3-dev
 
 WORKDIR /malware_analyse
 

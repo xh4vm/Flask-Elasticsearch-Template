@@ -12,8 +12,7 @@ class VirusShares:
 
     def get_hash_from_page(self, link_page : str):
         response = requests.get(self.host+'/'+link_page)
-        hashes = response.text.split()
-        del hashes[0:5]
+        hashes = re.sub('#[^\n]*\n', '', response.text).split("\n")
 
         return hashes
 

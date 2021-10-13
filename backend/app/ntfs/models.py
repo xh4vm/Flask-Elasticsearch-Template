@@ -4,6 +4,10 @@ from sqlalchemy.sql.sqltypes import String, Integer, BigInteger, SmallInteger
 from sqlalchemy.sql.schema import CheckConstraint, Column, UniqueConstraint, ForeignKey
 from ..db import Model, db
 from ..db.elasticsearch.mixin import ElasticsearchMixin
+import re
+from .utils.hash_handler.md5_handler import MD5Handler
+from .utils.hash_handler.sha1_handler import SHA1Handler
+from .utils.hash_handler.sha256_handler import SHA256Handler
 
 
 class Fingerprint(Model):
@@ -20,7 +24,7 @@ class Fingerprint(Model):
         self.net_settings = net_settings
         self.computer_name = computer_name
 
-    def add(self):
+    def insert_if_not_exists_and_select(self):
         fingerprint = Fingerprint.query.filter_by(serial_number=self.serial_number, friendly_name=self.friendly_name, computer_name=self.computer_name).first()
 
         if fingerprint is None:
@@ -37,7 +41,7 @@ class NotVerifiedVirus(Model):
     def __init__(self, hash_id : int):
         self.hash_id = hash_id
 
-    def add(self):
+    def insert_if_not_exists_and_select(self):
         not_verified_virus = NotVerifiedVirus.query.filter_by(hash_id=self.hash_id).first()
 
         if not_verified_virus is None:
@@ -49,9 +53,7 @@ class NotVerifiedVirus(Model):
     @staticmethod
     def add_hash(md5 : str = None, sha1 : str = None, sha256 : str = None):
         h = Hash(md5, sha1, sha256).add()
-        print("AAAAAAAAAAA", h)
         not_verified_virus = NotVerifiedVirus(h.id).add()
-        print("AAAAAAAAAAA", not_verified_virus)
     
 class Hash(Model, ElasticsearchMixin):
     __searchable__ = 'elastic_body'
@@ -68,21 +70,17 @@ class Hash(Model, ElasticsearchMixin):
     antivirus_info = db.relationship('AVInfo', secondary='hash_associates', backref=db.backref('hashes_info'))
     
     def __init__(self, md5 : str, sha1 : str, sha256 : str) -> None:
-        self.md5 = md5
-        self.sha1 = sha1
-        self.sha256 = sha256
+        self.md5 = MD5Handler(md5).get()
+        self.sha1 = SHA1Handler(sha1).get()
+        self.sha256 = SHA256Handler(sha256).get()
 
-    def add(self):
-        # hash = Hash.query.filter_by(md5=self.md5, sha1=self.sha1, sha256=self.sha256).first()
-        hash, total = Hash.search(expression=self.md5, fields=['hashes_md5'])
-
-        # print("BBBBBBBB", hash)
+    def insert_if_not_exists_and_select(self):
+        hash, total = Hash.search(expression=self.md5, fields=['md5'])
 
         if total == 0:
             self.session.add(self)
             self.session.commit()
 
-        # print("BBBBBBBBBBBB", hash[0] if total > 0 else self)
         return hash[0] if total > 0 else self
 
 class Object(Model, ElasticsearchMixin):
@@ -106,7 +104,7 @@ class Object(Model, ElasticsearchMixin):
         self.creation_time = creation_time
         self.last_write_time = last_write_time
     
-    def add(self):
+    def insert_if_not_exists_and_select(self):
         obj = Object.query.filter_by(path=self.path, hash_id=self.hash_id, fingerprint_id=self.fingerprint_id).first()
 
         if obj is None:
@@ -149,7 +147,7 @@ class AVInfo(Model, ElasticsearchMixin):
         self.popular_threat_category = json.dumps(popular_threat_category)
         self.status = status
 
-    def add(self):
+    def insert_if_not_exists_and_select(self):
         av_info = AVInfo.query.filter_by(type_description=self.type_description, packer=self.packer, 
             autostart_locations=self.autostart_locations, popular_threat_name=self.popular_threat_name, 
             popular_threat_category=self.popular_threat_category, status=self.status).first()
@@ -185,7 +183,7 @@ class  AVVerdict(Model, ElasticsearchMixin):
         self.method = method
         self.engine_update = engine_update
         
-    def add(self):
+    def insert_if_not_exists_and_select(self):
         av_verdict = AVVerdict.query.filter_by(category=self.category, engine_name=self.engine_name, 
             engine_version=self.engine_version, result=self.result,
             method=self.method, engine_update=self.engine_update).first()

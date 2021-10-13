@@ -80,17 +80,19 @@ class NTFS(FlaskView):
 
         f = validated_request['fingerprint']
         fingerprint = Fingerprint(serial_number=f.get('serial_number'), computer_name=f.get('computer_name'), 
-            net_settings=f.get('net_settings'), friendly_name=f.get('friendly_name')).add()
+            net_settings=f.get('net_settings'), friendly_name=f.get('friendly_name')).insert_if_not_exists_and_select()
 
         h = validated_request['hashes']
-        hash = Hash(md5=h.get('md5'), sha1=h.get('sha1'), sha256=h.get('sha256')).add()
+        hash = Hash(md5=h.get('md5'), sha1=h.get('sha1'), sha256=h.get('sha256')).insert_if_not_exists_and_select()
         
         Object(fingerprint_id=fingerprint.id, hash_id=hash.id, path=validated_request.get('path'), trusted=validated_request.get('trusted'),
-            creation_time=validated_request.get('creation_time'), last_write_time=validated_request.get('last_write_time')).add()
+            creation_time=validated_request.get('creation_time'), 
+            last_write_time=validated_request.get('last_write_time')).insert_if_not_exists_and_select()
         
-        # if not validated_request.get('trusted'):
-        if NotVerifiedVirus.query.filter_by(hash_id=hash.id).first() is not None:
-            args = prepare_spooler_args(id=hash.id, md5=hash.md5, vt_api_url=self.vt_api_url, vt_headers=json.dumps(self.vt_headers))
+        not_verified_virus = NotVerifiedVirus.query.filter_by(hash_id=hash.id).first()
+        if not_verified_virus is not None or not validated_request.get('trusted'):
+            args = prepare_spooler_args(
+                id=hash.id, md5=hash.md5, vt_api_url=self.vt_api_url, vt_headers=json.dumps(self.vt_headers))
             get_virustotal_verdict.spool(args)
 
         return jsonify(), 202

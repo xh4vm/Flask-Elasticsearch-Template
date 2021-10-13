@@ -8,7 +8,7 @@ try:
     import uwsgi
     from uwsgidecorators import spool 
     UWSGI = True
-
+    
 
     def prepare_spooler_args(**kwargs):
         args = {}
