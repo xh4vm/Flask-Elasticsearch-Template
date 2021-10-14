@@ -12,4 +12,4 @@ class MD5Handler(IHashHandler):
         if self.md5 is not None and re.match('[0-9a-z]{32}', self.md5, flags=re.IGNORECASE) is None:
             raise ValueError("MD5 hash error")
 
-        return self.md5
+        return self.md5 or ''

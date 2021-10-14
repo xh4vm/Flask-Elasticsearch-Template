@@ -89,10 +89,16 @@ class NTFS(FlaskView):
             creation_time=validated_request.get('creation_time'), 
             last_write_time=validated_request.get('last_write_time')).insert_if_not_exists_and_select()
         
-        not_verified_virus = NotVerifiedVirus.query.filter_by(hash_id=hash.id).first()
-        if not_verified_virus is not None or not validated_request.get('trusted'):
-            args = prepare_spooler_args(
+        args = prepare_spooler_args(
                 id=hash.id, md5=hash.md5, vt_api_url=self.vt_api_url, vt_headers=json.dumps(self.vt_headers))
+
+        not_verified_virus = NotVerifiedVirus.query.filter_by(hash_id=hash.id).first()
+
+        if not_verified_virus is not None:
+            get_virustotal_verdict.spool(args)
+            not_verified_virus.delete()
+
+        elif not validated_request.get('trusted'):
             get_virustotal_verdict.spool(args)
 
         return jsonify(), 202

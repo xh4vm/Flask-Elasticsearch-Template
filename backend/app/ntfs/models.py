@@ -36,7 +36,7 @@ class Fingerprint(Model):
 class NotVerifiedVirus(Model):
     __tablename__ = 'not_verified_viruses'
 
-    hash_id = Column(BigInteger, ForeignKey('hashes.id'))
+    hash_id = Column(BigInteger, ForeignKey('object_hashes.id'))
 
     def __init__(self, hash_id : int):
         self.hash_id = hash_id
@@ -57,7 +57,7 @@ class NotVerifiedVirus(Model):
     
 class Hash(Model, ElasticsearchMixin):
     __searchable__ = 'elastic_body'
-    __tablename__ = 'hashes'
+    __tablename__ = 'object_hashes'
     __table_args__ = (
         CheckConstraint('md5 IS NOT NULL OR sha1 IS NOT NULL OR sha256 IS NOT NULL'),)
 
@@ -75,26 +75,39 @@ class Hash(Model, ElasticsearchMixin):
         self.sha256 = SHA256Handler(sha256).get()
 
     def insert_if_not_exists_and_select(self):
-        hash, total = Hash.search(expression=self.md5, fields=['md5'])
+        query = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {"term": {"md5": self.md5}},
+                        {"term": {"sha1": self.sha1}},
+                        {"term": {"sha256": self.sha256}}
+                    ]
+                }
+            }
+        }
 
-        if total == 0:
+        hash = Hash.raw_search_one(body=query)
+
+        if hash is None:
             self.session.add(self)
             self.session.commit()
+            return self
 
-        return hash[0] if total > 0 else self
+        return hash
 
 class Object(Model, ElasticsearchMixin):
     __searchable__ = 'elastic_body'
     __table_args__ = (UniqueConstraint('path', 'hash_id', 'fingerprint_id', name='uq_file'),)
 
     fingerprint_id = Column(BigInteger, ForeignKey('fingerprints.id'))
-    hash_id = Column(BigInteger, ForeignKey('hashes.id'))
+    hash_id = Column(BigInteger, ForeignKey('object_hashes.id'))
     path = Column(String(1024), nullable=False)
     trusted = Column(SmallInteger, nullable=False, default=0)
     creation_time = Column(String(128), nullable=False)
     last_write_time = Column(String(128), nullable=False)
 
-    elastic_body=['fingerprint_id', 'path', 'hash_id', 'creation_time', 'last_write_time']
+    elastic_body=['path', 'creation_time', 'last_write_time']
 
     def __init__(self, fingerprint_id: int, path : str, hash_id : str, trusted : int, creation_time : str, last_write_time : str) -> None:
         self.fingerprint_id = fingerprint_id
@@ -115,7 +128,7 @@ class Object(Model, ElasticsearchMixin):
 
 class HashAssociate(Model):
 
-    hash_id = Column(BigInteger, ForeignKey('hashes.id'))
+    hash_id = Column(BigInteger, ForeignKey('object_hashes.id'))
     av_info_id = Column(BigInteger, ForeignKey('av_infos.id'))
 
 class AVInfo(Model, ElasticsearchMixin):
@@ -160,7 +173,7 @@ class AVInfo(Model, ElasticsearchMixin):
 
 class VerdictAssociate(Model):
 
-    hash_id = Column(BigInteger, ForeignKey('hashes.id'))
+    hash_id = Column(BigInteger, ForeignKey('object_hashes.id'))
     av_verdict_id = Column(BigInteger, ForeignKey('av_verdicts.id'))
 
 class  AVVerdict(Model, ElasticsearchMixin):

@@ -12,4 +12,4 @@ class SHA1Handler(IHashHandler):
         if self.sha1 is not None and re.match('[0-9a-z]{40}', self.sha1, flags=re.IGNORECASE) is None:
             raise ValueError("SHA1 hash error")
 
-        return self.sha1
+        return self.sha1 or ''

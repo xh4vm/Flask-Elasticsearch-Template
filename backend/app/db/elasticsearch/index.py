@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from ..exceptions import DBExceptions
 from flask import current_app
+from elasticsearch import helpers
 
 
 class Index:
@@ -24,9 +25,8 @@ class Index:
 
     def add(self, model : object) -> None:
         payload = {field : getattr(model, field) for field in getattr(model, model.__searchable__)}
-        
-        # current_app.elasticsearch.indices.create(index=self.index, body=payload)
         current_app.elasticsearch.index(index=self.index, doc_type=self.index, id=model.id, body=payload)
+
 
     def remove(self, model : object) -> None:
         current_app.elasticsearch.delete(index=self.index, doc_type=self.index, id=model.id)
@@ -34,6 +34,10 @@ class Index:
     def raw_query(self, body : dict) -> Tuple[list, int]:
         search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, body=body)
         return [int(hit['_id']) for hit in search['hits']['hits']], search['hits']['total']
+
+    def raw_query_one(self, body : dict) -> list:
+        search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, body=body)
+        return int(search['hits']['hits'][0]['_id']) if len(search['hits']['hits']) > 0 else None
 
     def query_one(self, args : dict) -> list:
         search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, 

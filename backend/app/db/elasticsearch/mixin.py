@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple, Union
 from flask_sqlalchemy import BaseQuery
 from .. import db
 from .index import Index
@@ -23,7 +23,14 @@ class ElasticsearchMixin(object):
         return cls.query.filter(cls.id.in_(ids)).all(), total['value']
 
     @classmethod
-    def search_one(cls, expression : str) -> BaseQuery:
+    def raw_search_one(cls, body : dict) -> Optional[BaseQuery]:
+        Index(cls.__tablename__).add_if_not_exists(cls)
+        id = Index(cls.__tablename__).raw_query_one(body)
+
+        return cls.query.filter(cls.id == id).first()
+
+    @classmethod
+    def search_one(cls, expression : str) -> Optional[BaseQuery]:
         Index(cls.__tablename__).add_if_not_exists(cls)
         id = Index(cls.__tablename__).query_one(expression)
 
