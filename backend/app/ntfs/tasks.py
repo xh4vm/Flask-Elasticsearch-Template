@@ -37,6 +37,13 @@ try:
         # except:
         #     return uwsgi.SPOOL_RETRY
 
+    @spool
+    def add_hash(args : dict):
+        h = Hash(args.get('md5'), args.get('sha1'), args.get('sha256')).insert_if_not_exists_and_select()
+        not_verified_virus = NotVerifiedVirus(h.id).insert_if_not_exists_and_select()
+
+        return uwsgi.SPOOL_OK
+
 except:
     UWSGI = False
 
@@ -48,3 +55,7 @@ except:
 
         verdict = Verdict(verdict_data)
         verdict.add_analysis_results(hash_id=id)
+
+    def add_hash(args : dict):
+        h = Hash(args.get('md5'), args.get('sha1'), args.get('sha256')).insert_if_not_exists_and_select()
+        not_verified_virus = NotVerifiedVirus(h.id).insert_if_not_exists_and_select()

@@ -53,11 +53,11 @@
 
             <tbody>
                 {% for obj in objects %}
-                    <tr onclick="window.location.href = '/ntfs/{{ obj.fingerprint_id }}/{{ obj.id }}/'" id="{{ obj.id }}" class="object cursor-pointer {% if obj.trusted == 1 %} bg-success-soft {% endif %} {% if obj.status == 106107 %} bg-danger-soft {% elif obj.status == 106103 %} bg-warning-soft {% elif obj.status == 106108 %} bg-secondary-soft {% endif %} bg-primary-soft-hover transition-bg-ease-150 text-decoration-none">
-                        <th scope="row">{{ obj.path }}</th>
-                        <td>{{ obj.md5 }}</td>
-                        <td>{{ obj.sha1 }}</td>
-                        <td>{{ obj.sha256 }}</td>
+                    <tr onclick="window.location.href = '/ntfs/{{ obj.fingerprint_id }}/{{ obj.id }}/'" id="{{ obj.id }}" class="object cursor-pointer {% if obj.status == 106107 %} bg-danger-soft {% elif obj.status == 106103 %} bg-warning-soft {% elif obj.status == 106108 %} bg-secondary-soft {% endif %} bg-primary-soft-hover transition-bg-ease-150 text-decoration-none">
+                        <th scope="row" class="{% if obj.trusted == 1 %} text-success {% endif %}">{{ obj.path }}</th>
+                        <td class="{% if obj.trusted == 1 %} text-success {% endif %}">{{ obj.md5 }}</td>
+                        <td class="{% if obj.trusted == 1 %} text-success {% endif %}">{{ obj.sha1 }}</td>
+                        <td class="{% if obj.trusted == 1 %} text-success {% endif %}">{{ obj.sha256 }}</td>
                         <td>{{ obj.creation_time }}</td>
                         <td>{{ obj.last_write_time }}</td>
                     </tr>

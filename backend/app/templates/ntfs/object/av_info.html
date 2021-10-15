@@ -44,6 +44,12 @@
                     <li class="clearfix mb-2">
                         <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
                             <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">Подпись:</span> {% if object.trusted %} <i class="text-success fi fi-mdeal"></i> {% else %} <i class="text-danger fi fi-bell-full-active"></i> {% endif %}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
                         </div> <span class="text-primary">Дата создания:</span> {{object.creation_time}}
                     </li>
 

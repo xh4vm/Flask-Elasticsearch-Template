@@ -1,7 +1,6 @@
 from typing import List, Tuple
 from ..exceptions import DBExceptions
 from flask import current_app
-from elasticsearch import helpers
 
 
 class Index:
@@ -23,30 +22,29 @@ class Index:
         
         return True
 
-    def add(self, model : object) -> None:
+    def add(self, model : object) -> dict:
         payload = {field : getattr(model, field) for field in getattr(model, model.__searchable__)}
-        current_app.elasticsearch.index(index=self.index, doc_type=self.index, id=model.id, body=payload)
-
+        return current_app.elasticsearch.index(index=self.index, id=model.id, body=payload, refresh='true')
 
     def remove(self, model : object) -> None:
-        current_app.elasticsearch.delete(index=self.index, doc_type=self.index, id=model.id)
+        current_app.elasticsearch.delete(index=self.index, id=model.id)
 
     def raw_query(self, body : dict) -> Tuple[list, int]:
-        search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, body=body)
+        search = current_app.elasticsearch.search(index=self.index, body=body)
         return [int(hit['_id']) for hit in search['hits']['hits']], search['hits']['total']
 
     def raw_query_one(self, body : dict) -> list:
-        search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, body=body)
+        search = current_app.elasticsearch.search(index=self.index, body=body)
         return int(search['hits']['hits'][0]['_id']) if len(search['hits']['hits']) > 0 else None
 
     def query_one(self, args : dict) -> list:
-        search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, 
+        search = current_app.elasticsearch.search(index=self.index,  
             body={'query': {'match': args}, 'size': 1})
 
         return int(search['hits']['hits'][0]['_id']) if len(search['hits']['hits']) > 0 else None
 
     def query(self, query : str, fields : List[str]) -> Tuple[list, int]:
-        search = current_app.elasticsearch.search(index=self.index, doc_type=self.index, 
+        search = current_app.elasticsearch.search(index=self.index,  
             body={'query': {'multi_match': {'query': query, 'fields': fields}}})
 
         return [int(hit['_id']) for hit in search['hits']['hits']], search['hits']['total']

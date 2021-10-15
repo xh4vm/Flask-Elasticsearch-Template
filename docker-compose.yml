@@ -39,12 +39,13 @@ services:
       - 5432:5432
     restart: unless-stopped
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ./db/postgres-data:/var/lib/postgresql/data
   elasticsearch:
     build: ./elasticsearch
     container_name: elasticsearch
     volumes:
      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+     - ./elasticsearch/elasticsearch-data:/usr/share/elasticsearch/data:rw
     ports:
       - 9200:9200
     environment:
@@ -52,8 +53,11 @@ services:
       - xpack.license.self_generated.type=trial
       # - ELASTIC_PASSWORD=elastic
       # - ELASTIC_USERNAME=elastic
-      - ES_JAVA_OPTS=-Xmx256m -Xms256m
-      - action.auto_create_index=+fingerprints*, +hashes*, +not_verified_viruses*, +objects*, +hash_associates*, +av_infos*, +verdict_associates*, +av_verdicts*
+      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     networks:
       - elastic
     healthcheck:

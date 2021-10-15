@@ -11,7 +11,7 @@ from .schemas import post_hash_schema
 from app.utils.request_type.JSON import JSON
 from .models import Hash, Object, AVInfo, AVVerdict, Fingerprint, HashAssociate, VerdictAssociate, NotVerifiedVirus
 from .serializers import serialize_hash
-from .tasks import get_virustotal_verdict
+from .tasks import get_virustotal_verdict, add_hash
 from sqlalchemy.sql.expression import null
 from itertools import chain
 from .utils.enrichment.virus_shares import VirusShares
@@ -28,6 +28,9 @@ class NTFS(FlaskView):
     vt_headers = {'x-apikey' : 'a13a8e8e39c0b2a66bbd36dc2256467a9e692ca471391fd26a7edd7b1bb1163e'}
 
     def get(self):
+
+        # print(len([h.md5 for h in Hash.query.filter(NotVerifiedVirus.hash_id == Hash.id).all()]))
+
         fingerprint_data = (Fingerprint.query
             .with_entities(*Fingerprint.__table__.columns, func.count(Object.id).label('count_objects'))
             .filter(Fingerprint.id == Object.fingerprint_id)
@@ -113,6 +116,9 @@ class NTFS(FlaskView):
             hashes = virus_shares.get_hash_from_page(link_page)
 
             for md5 in hashes:
-                NotVerifiedVirus.add_hash(md5=md5)
+                args = prepare_spooler_args(md5=md5)
+                add_hash(args)
+                # add_hash.spool(args)
+                # NotVerifiedVirus.add_hash(md5=md5)
 
         return {"status": True}, 200

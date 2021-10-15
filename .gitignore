@@ -114,3 +114,4 @@ dmypy.json
 .pyre/
 
 postgres-data
+elasticsearch-data

@@ -50,20 +50,21 @@ class NotVerifiedVirus(Model):
 
         return not_verified_virus or self
 
-    @staticmethod
-    def add_hash(md5 : str = None, sha1 : str = None, sha256 : str = None):
-        h = Hash(md5, sha1, sha256).add()
-        not_verified_virus = NotVerifiedVirus(h.id).add()
+    # @staticmethod
+    # def add_hash(md5 : str = None, sha1 : str = None, sha256 : str = None):
+    #     h = Hash(md5, sha1, sha256).insert_if_not_exists_and_select()
+    #     not_verified_virus = NotVerifiedVirus(h.id).insert_if_not_exists_and_select()
     
 class Hash(Model, ElasticsearchMixin):
     __searchable__ = 'elastic_body'
     __tablename__ = 'object_hashes'
     __table_args__ = (
-        CheckConstraint('md5 IS NOT NULL OR sha1 IS NOT NULL OR sha256 IS NOT NULL'),)
+        CheckConstraint("md5 != '' OR sha1 != '' OR sha256 != ''", name='check_object_hash'),
+        UniqueConstraint('md5', 'sha1', 'sha256', name='uq_object_hash'),)
 
-    md5 = Column(String(32), nullable=True, unique=True)
-    sha1 = Column(String(40), nullable=True, unique=True)
-    sha256 = Column(String(64), nullable=True, unique=True)
+    md5 = Column(String(32), nullable=False)
+    sha1 = Column(String(40), nullable=False)
+    sha256 = Column(String(64), nullable=False)
 
     elastic_body = ['md5', 'sha1', 'sha256']
 
@@ -74,20 +75,33 @@ class Hash(Model, ElasticsearchMixin):
         self.sha1 = SHA1Handler(sha1).get()
         self.sha256 = SHA256Handler(sha256).get()
 
+    @property
+    def __should__(self):
+        _should = []
+        
+        if self.md5 != "":
+            _should.append({"match": {"md5": self.md5}})
+
+        if self.sha1 != "":
+            _should.append({"match": {"sha1": self.sha1}})
+
+        if self.sha256 != "":
+            _should.append({"match": {"sha256": self.sha256}})
+        
+        return _should
+
     def insert_if_not_exists_and_select(self):
         query = {
             "query": {
                 "bool": {
-                    "should": [
-                        {"term": {"md5": self.md5}},
-                        {"term": {"sha1": self.sha1}},
-                        {"term": {"sha256": self.sha256}}
-                    ]
+                    "must": self.__should__
                 }
             }
         }
-
+        
         hash = Hash.raw_search_one(body=query)
+        
+        print("AAAAAAAAAAA", hash, self.md5)
 
         if hash is None:
             self.session.add(self)
@@ -107,6 +121,7 @@ class Object(Model, ElasticsearchMixin):
     creation_time = Column(String(128), nullable=False)
     last_write_time = Column(String(128), nullable=False)
 
+    hash = relationship('Hash')
     elastic_body=['path', 'creation_time', 'last_write_time']
 
     def __init__(self, fingerprint_id: int, path : str, hash_id : str, trusted : int, creation_time : str, last_write_time : str) -> None:
