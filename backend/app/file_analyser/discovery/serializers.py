@@ -1,4 +1,4 @@
-from .models import Hash
+from ..models import Hash
 
 
 def serialize_hash(hash : Hash):

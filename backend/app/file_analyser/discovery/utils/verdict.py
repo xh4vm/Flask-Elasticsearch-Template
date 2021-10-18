@@ -1,8 +1,9 @@
 import json
 from typing import Tuple
-from ...db import db
+from ....db import db
 from sqlalchemy.orm.scoping import scoped_session
-from ..models import AVVerdict, AVInfo, Hash, HashAssociate, VerdictAssociate
+from ..models import AVVerdict, AVInfo, VerdictAssociate
+from ...models import Hash, HashAssociate
 
 
 class Verdict:

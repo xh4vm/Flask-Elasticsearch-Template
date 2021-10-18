@@ -1,0 +1,31 @@
+<div style="width: 90%;" class=" mx-auto p-5 mt-3 bg-white shadow-xs rounded-xl text-gray-800">
+    <table class="table m-0">
+        <thead>
+            <tr>
+                <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--10 text-center">#</th>
+                <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--200 text-center">Путь</th>
+                <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--200 text-center">MD5</th>
+                <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--120 text-center">SHA-1</th>
+                <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--100 text-center">SHA-256</th>
+                <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--100 text-center">Дата создания</th>
+                <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--100 text-center">Дата изменения</th>
+            </tr>
+        </thead>
+
+        <tbody id="item_list">
+            {% for obj in objects.items %}
+                <tr onclick="window.location.href = '/file_analyser/{{ obj.fingerprint_id }}/{{ obj.id }}/'" id="{{ obj.id }}" class="object cursor-pointer {% if obj.status == 106107 %} bg-danger-soft {% elif obj.status == 106103 %} bg-warning-soft {% elif obj.status == 106108 %} bg-secondary-soft {% endif %} bg-primary-soft-hover transition-bg-ease-150 text-decoration-none">
+                    <td class="text-center">{{loop.index}}</td>
+                    <th scope="row" class="{% if obj.trusted == 1 %} text-success {% endif %}">{{ obj.path }}</th>
+                    <td class="{% if obj.trusted == 1 %} text-success {% endif %}">{{ obj.md5 }}</td>
+                    <td class="{% if obj.trusted == 1 %} text-success {% endif %}">{{ obj.sha1 }}</td>
+                    <td class="{% if obj.trusted == 1 %} text-success {% endif %}">{{ obj.sha256 }}</td>
+                    <td>{{ obj.creation_time }}</td>
+                    <td>{{ obj.last_write_time }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% include 'file_analyser/host/pagination.html' %}
+</div>

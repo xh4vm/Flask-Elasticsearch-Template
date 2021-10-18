@@ -1,0 +1,55 @@
+<div class="container ">
+    <form 	action="/file_analyser/{{fingerprint_id}}/" 
+            method="POST" 
+            data-autosuggest="on" 
+
+            data-mode="json" 
+            data-json-max-results='10'
+            data-json-related-item-icon='fi fi-star-empty'
+            data-json-highlight-term='true'
+            data-contentType='application/json; charset=utf-8'
+            data-dataType='json'
+
+            data-container="#sow-search-container" 
+            data-input-min-length="2" 
+            data-input-delay="250" 
+            data-related-keywords="" 
+            class="js-ajax-search sow-search sow-search-mobile-float d-flex-1-1-auto mx-5 m-0-xs">
+        <div class="sow-search-input w-100">
+
+            <div class="input-group-over d-flex align-items-center w-100 h-100 rounded form-control-pill">
+
+                <input placeholder="Хочешь что-то поискать?" aria-label="Хочешь что-то поискать?" name="s" type="text" class="form-control-sow-search form-control form-control-lg" value="" autocomplete="off">
+
+                <span class="sow-search-buttons">
+
+                    <button aria-label="Global Search" type="submit" class="btn shadow-none m-0 px-3 py-2 bg-transparent text-muted">
+                        <i class="fi fi-search fs--20 m-0"></i>
+                    </button>
+
+                    <a href="javascript:;" class="btn-sow-search-toggler btn btn-light shadow-none m-0 p-2 d-inline-block d-lg-none">
+                        <i class="fi fi-close fs--20 m-0"></i>
+                    </a>
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="sow-search-container w-100 p-0 hide shadow-md" id="sow-search-container">
+            <div class="sow-search-container-wrapper">
+
+                <div class="sow-search-loader p-3 text-center hide">
+                    <i class="fi fi-circle-spin fi-spin text-muted fs--30"></i>
+                </div>
+
+                <div class="sow-search-content rounded w-100 scrollable-vertical"></div>
+
+            </div>
+        </div>
+        
+        <div class="sow-search-backdrop overlay-dark opacity-3 hide"></div>
+
+    </form>
+</div>

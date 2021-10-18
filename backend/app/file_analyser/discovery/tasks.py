@@ -1,7 +1,7 @@
 import requests
 import json
-from app.ntfs.utils.verdict import Verdict
-from app.ntfs.models import *
+from .utils.verdict import Verdict
+from ..models import *
 import json
 
 try:

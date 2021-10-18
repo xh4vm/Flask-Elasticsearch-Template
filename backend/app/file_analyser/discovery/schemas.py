@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields
 
 
-class PostHashSchema(Schema):
+class PostDiscoverySchema(Schema):
     fingerprint = fields.Dict(keys=fields.String(), values=fields.String(), required=True)
     trusted = fields.Integer(required=True)
     hashes = fields.Dict(keys=fields.String(), values=fields.String(), required=True)
@@ -9,4 +9,4 @@ class PostHashSchema(Schema):
     creation_time = fields.String(required=True)
     last_write_time = fields.String(required=True)
 
-post_hash_schema = PostHashSchema()
+post_discovery_schema = PostDiscoverySchema()

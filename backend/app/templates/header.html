@@ -1,14 +1,11 @@
-<!-- HEADER -->
 <header id="header" class="shadow-xs">
 
-    <!-- NAVBAR -->
     <div class="container position-relative">
 
         <nav class="navbar navbar-expand-lg navbar-light justify-content-lg-between justify-content-md-inherit">
 
             <div class="align-items-start">
 
-                <!-- mobile menu button : show -->
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMainNav" aria-controls="navbarMainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <svg width="25" viewBox="0 0 20 20">
                         <path d="M 19.9876 1.998 L -0.0108 1.998 L -0.0108 -0.0019 L 19.9876 -0.0019 L 19.9876 1.998 Z"></path>
@@ -18,53 +15,36 @@
                     </svg>
                 </button>
 
-                <!--
-                    Logo : height: 70px max
-                -->
-                <!-- <a class="navbar-brand" href="index.html">
-                    <img src="{{url_for('static', filename='assets/images/logo/logo_dark.svg')}}" width="110" height="70" alt="...">
-                    <img src="{{url_for('static', filename='assets/images/logo/logo_light.svg')}}" width="110" height="70" alt="...">
-                </a> -->
-
             </div>
 
 
             <div class="collapse navbar-collapse navbar-animate-fadein" id="navbarMainNav">
 
 
-                <!-- MOBILE MENU NAVBAR -->
-                <div class="navbar-xs d-none"><!-- .sticky-top -->
+                <div class="navbar-xs d-none">
 
-                    <!-- mobile menu button : close -->
                     <button class="navbar-toggler pt-0" type="button" data-toggle="collapse" data-target="#navbarMainNav" aria-controls="navbarMainNav" aria-expanded="false" aria-label="Toggle navigation">
                         <svg width="20" viewBox="0 0 20 20">
                             <path d="M 20.7895 0.977 L 19.3752 -0.4364 L 10.081 8.8522 L 0.7869 -0.4364 L -0.6274 0.977 L 8.6668 10.2656 L -0.6274 19.5542 L 0.7869 20.9676 L 10.081 11.679 L 19.3752 20.9676 L 20.7895 19.5542 L 11.4953 10.2656 L 20.7895 0.977 Z"></path>
                         </svg>
                     </button>
 
-                    <!--
-                        Mobile Menu Logo
-                        Logo : height: 70px max
-                    -->
+                   
                     <a class="navbar-brand" href="index.html">
                         <img src="{{url_for('static', filename='assets/images/logo/logo_dark.svg')}}" width="110" height="70" alt="...">
                     </a>
 
                 </div>
-                <!-- /MOBILE MENU NAVBAR -->
 
 
 
-                <!-- NAVIGATION -->
                 <ul class="navbar-nav">
                     <li class="nav-item d-block d-sm-none">
 
-                        <!-- image -->
                         <div class="mb-4">
                             <img width="600" height="600" class="img-fluid" src="{{url_for('static', filename='demo.files/svg/artworks/people_crossbrowser.svg')}}" alt="...">
                         </div>
 
-                        <!-- search -->
                         <form method="get" action="#!search" class="input-group-over mb-5 bg-light p-2 form-control-pill">
                             <input type="text" name="keyword" value="" placeholder="Quick search..." class="form-control border-dashed">
                             <button class="btn btn-primary btn-ghost fi fi-search p-0 ml-2 mr-2 w--50 h--50"></button>
@@ -73,7 +53,6 @@
                     </li>
 
 
-                    <!-- home -->
                     <li class="nav-item dropdown active">
 
                         <a href="/" class="nav-link">
@@ -83,11 +62,26 @@
                     </li>
 
 
-                    <!-- project -->
                     <li class="nav-item dropdown">
 
-                        <a href="/ntfs/" class="nav-link">
+                        <a href="/file_analyser/" class="nav-link">
                             Анализ файлов
+                        </a>
+
+                    </li>
+
+                    <li class="nav-item dropdown">
+
+                        <a href="/log_analyser/" class="nav-link">
+                            Анализ логов
+                        </a>
+
+                    </li>
+
+                    <li class="nav-item dropdown">
+
+                        <a href="/sandbox/" class="nav-link">
+                            Песочница
                         </a>
 
                     </li>
@@ -99,7 +93,5 @@
         </nav>
 
     </div>
-    <!-- /NAVBAR -->
 
 </header>
-<!-- /HEADER -->
