@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <section>
+        {% include 'file_analyser/enrichment/button.html' %}
+
+    </section>
+{% endblock %}
+
+{% block additional_scripts %}
+    <script src="{{url_for('static', filename='js/file_analyser/enrichment/index.js')}}"></script>
+{% endblock %}

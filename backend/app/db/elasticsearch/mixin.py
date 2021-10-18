@@ -17,10 +17,12 @@ class ElasticsearchMixin(object):
         Index(cls.__tablename__).add_if_not_exists(cls)
         ids, total = Index(cls.__tablename__).raw_query(body=body)
 
-        # when = [(ids[i], i) for i in range(len(ids))]
-
-        # r = cls.query.filter(cls.id.in_(ids)).order_by(db.case(when, value=cls.id)).all(), total['value']
         return cls.query.filter(cls.id.in_(ids)).all(), total['value']
+
+    @classmethod
+    def raw_search_ids(cls, body : dict) -> Tuple[BaseQuery, int]:
+        Index(cls.__tablename__).add_if_not_exists(cls)
+        return Index(cls.__tablename__).raw_query(body=body)
 
     @classmethod
     def raw_search_one(cls, body : dict) -> Optional[BaseQuery]:
@@ -30,11 +32,21 @@ class ElasticsearchMixin(object):
         return cls.query.filter(cls.id == id).first()
 
     @classmethod
+    def raw_search_one_id(cls, body : dict) -> Optional[BaseQuery]:
+        Index(cls.__tablename__).add_if_not_exists(cls)
+        return Index(cls.__tablename__).raw_query_one(body)
+
+    @classmethod
     def search_one(cls, expression : str) -> Optional[BaseQuery]:
         Index(cls.__tablename__).add_if_not_exists(cls)
         id = Index(cls.__tablename__).query_one(expression)
 
         return cls.query.filter(cls.id == id).first()
+
+    @classmethod
+    def search_one_id(cls, expression : str) -> Optional[BaseQuery]:
+        Index(cls.__tablename__).add_if_not_exists(cls)
+        return Index(cls.__tablename__).query_one(expression)
 
     @classmethod
     def search(cls, expression : str, fields : List[str] = ['*']) -> Tuple[BaseQuery, int]:
@@ -45,6 +57,11 @@ class ElasticsearchMixin(object):
 
         # r = cls.query.filter(cls.id.in_(ids)).order_by(db.case(when, value=cls.id)).all(), total['value']
         return cls.query.filter(cls.id.in_(ids)).all(), total['value']
+   
+    @classmethod
+    def search_ids(cls, expression : str, fields : List[str] = ['*']) -> Tuple[BaseQuery, int]:
+        Index(cls.__tablename__).add_if_not_exists(cls)
+        return Index(cls.__tablename__).query(expression, fields)
 
     @classmethod
     def before_commit(cls, session : dict) -> None:

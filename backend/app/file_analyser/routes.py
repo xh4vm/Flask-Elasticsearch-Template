@@ -35,6 +35,11 @@ class FileAnalyser(FlaskView):
 
         return render_template("file_analyser/index.html", fingerprint_data=fingerprint_data), 200
 
+    @route('/settings/', methods=['GET'])
+    def settings(self):
+
+        return render_template("file_analyser/settings.html"), 200
+
     @fingerprint_required
     @route('/<int:fingerprint_id>/', methods=['GET'])
     def by_fingerprint(self, fingerprint : Fingerprint):
@@ -83,10 +88,9 @@ class FileAnalyser(FlaskView):
         per_page = 10
         page = request.args.get('page', 1, type=int)
 
-        _objects_result_search, to = Object.search(expression=validated_request['s'])
         _hash_result_search, th = Hash.search(expression=validated_request['s'])
 
-        result_search = [o.id for o in _objects_result_search]
+        result_search, to = Object.search_ids(expression=validated_request['s'])
         result_search.extend(chain(*[[o.id for o in h.object] for h in _hash_result_search]))
 
         objects_with_status = (Object
