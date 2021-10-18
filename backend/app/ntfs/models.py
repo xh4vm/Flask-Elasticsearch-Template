@@ -70,7 +70,7 @@ class Hash(Model, ElasticsearchMixin):
 
     antivirus_info = db.relationship('AVInfo', secondary='hash_associates', backref=db.backref('hashes_info'))
     
-    def __init__(self, md5 : str, sha1 : str, sha256 : str) -> None:
+    def __init__(self, md5 : str = None, sha1 : str = None, sha256 : str = None) -> None:
         self.md5 = MD5Handler(md5).get()
         self.sha1 = SHA1Handler(sha1).get()
         self.sha256 = SHA256Handler(sha256).get()

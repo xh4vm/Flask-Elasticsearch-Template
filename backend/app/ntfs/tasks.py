@@ -23,7 +23,6 @@ try:
 
         response = requests.get(f"{args['vt_api_url']}/{md5}", headers=json.loads(args['vt_headers']))
 
-        print(response.status_code)
         if response.status_code == 404:
             return uwsgi.SPOOL_OK
 

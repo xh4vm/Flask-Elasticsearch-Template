@@ -1,4 +1,4 @@
-# from celery import Celery
+from celery import Celery
 from config import Config
 from .extensions.flask_elastic import FlaskElastic
 from flask_migrate import Migrate
@@ -8,7 +8,7 @@ from .db import db
 
 migrate = Migrate()
 redis_client = FlaskRedis()
-# celery = Celery(__name__, backend=Config.CELERY_RESULT_BACKEND, broker=Config.CELERY_BROKER_URL)
+celery = Celery(__name__, backend=Config.RESULT_BACKEND, broker=Config.BROKER_URL)
 
 def register_blueprints(app):
     from app.home import bp as home_bp
@@ -24,7 +24,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     redis_client.init_app(app)
-    # celery.conf.update(app.config)
+    celery.conf.update(app.config)
 
     register_blueprints(app)
 
@@ -33,19 +33,19 @@ def create_app(config_class=Config):
     return app
     
 
-# def make_celery(app):
-#     celery = Celery(
-#         app.import_name,
-#         backend=app.config['CELERY_RESULT_BACKEND'],
-#         broker=app.config['CELERY_BROKER_URL']
-#     )
-#     celery.conf.update(app.config)
+def make_celery(app):
+    celery = Celery(
+        app.import_name,
+        backend=app.config['RESULT_BACKEND'],
+        broker=app.config['BROKER_URL']
+    )
+    celery.conf.update(app.config)
 
-#     class ContextTask(celery.Task):
-#         def __call__(self, *args, **kwargs):
-#             with app.app_context():
-#                 return self.run(*args, **kwargs)
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
 
-#     celery.Task = ContextTask
-#     celery.config_from_object(__name__)
-#     return celery
+    celery.Task = ContextTask
+    celery.config_from_object(__name__)
+    return celery

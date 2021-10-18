@@ -6,6 +6,7 @@ RUN apt-get update
 RUN apt-get install -y nginx 
 RUN apt-get install -y python3-pip
 RUN apt-get install -y build-essential
+RUN apt-get install -y redis-server
 RUN apt-get install -y postgresql
 RUN apt-get install -y postgresql-client
 RUN apt-get install -y python3-dev

@@ -15,7 +15,7 @@ from .tasks import get_virustotal_verdict, add_hash
 from sqlalchemy.sql.expression import null
 from itertools import chain
 from .utils.enrichment.virus_shares import VirusShares
-
+from .celery_task import add_virus_hash, get_virustotal_verdict
 try:
     from .tasks import prepare_spooler_args
 except:
@@ -92,33 +92,37 @@ class NTFS(FlaskView):
             creation_time=validated_request.get('creation_time'), 
             last_write_time=validated_request.get('last_write_time')).insert_if_not_exists_and_select()
         
-        args = prepare_spooler_args(
-                id=hash.id, md5=hash.md5, vt_api_url=self.vt_api_url, vt_headers=json.dumps(self.vt_headers))
-
         not_verified_virus = NotVerifiedVirus.query.filter_by(hash_id=hash.id).first()
 
         if not_verified_virus is not None:
-            get_virustotal_verdict.spool(args)
+            get_virustotal_verdict.delay(hash=serialize_hash(hash), vt_api_url=self.vt_api_url, vt_headers=self.vt_headers)
             not_verified_virus.delete()
 
         elif not validated_request.get('trusted'):
-            get_virustotal_verdict.spool(args)
-
+            get_virustotal_verdict.delay(hash=serialize_hash(hash), vt_api_url=self.vt_api_url, vt_headers=self.vt_headers)
+        
         return jsonify(), 202
 
     @route('/hash/enrichment/virus_shares/', methods=['GET'])
     def get_hashes_virus_shares(self):
-        virus_shares = VirusShares()
+        link_pages = VirusShares.get_link_pages()
 
-        link_pages = virus_shares.get_link_pages()
-
+        tasks = []
         for link_page in link_pages:
-            hashes = virus_shares.get_hash_from_page(link_page)
+            tasks.append(add_virus_hash.delay(link_page=link_page))
 
-            for md5 in hashes:
-                args = prepare_spooler_args(md5=md5)
-                add_hash(args)
-                # add_hash.spool(args)
-                # NotVerifiedVirus.add_hash(md5=md5)
+        return render_template('ntfs/enrichment/index.html', tasks=tasks), 202
 
-        return {"status": True}, 200
+    # @route('/check/<task_id>/', methods=["POST"])
+    # def check_task_status(self, task_id):
+    #     '''GET /structure/check/<str:task_id>/'''
+    #     task = get_difference_structure.AsyncResult(str(task_id))
+
+    #     if task.state == 'PENDING': 
+    #         return jsonify({'state': 'PENDING', 'status': 'Pending...'}), 200
+        
+    #     elif task.state != 'FAILURE':
+    #         return jsonify({"is_correct": False, 'state': task.state, "difference": task.info}), 200
+        
+    #     else:
+    #         return jsonify({'state': task.state, 'status': 'Fail'}), 200
