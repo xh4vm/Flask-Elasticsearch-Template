@@ -46,6 +46,7 @@ class Object(Model, ElasticsearchMixin):
     last_write_time = Column(String(128), nullable=False)
 
     hash = relationship('Hash', backref=db.backref('object'))
+
     elastic_body=['path', 'creation_time', 'last_write_time']
 
     def __init__(self, fingerprint_id: int, path : str, hash_id : str, trusted : int, creation_time : str, last_write_time : str) -> None:
@@ -97,6 +98,7 @@ class Hash(Model, ElasticsearchMixin):
     elastic_body = ['md5', 'sha1', 'sha256']
 
     antivirus_info = db.relationship('AVInfo', secondary='hash_associates', backref=db.backref('hashes'))
+    antivirus_verdict = db.relationship('AVVerdict', secondary='verdict_associates', backref=db.backref('hashes'))
     
     def __init__(self, md5 : str = None, sha1 : str = None, sha256 : str = None) -> None:
         self.md5 = MD5Handler(md5).get()
@@ -104,33 +106,31 @@ class Hash(Model, ElasticsearchMixin):
         self.sha256 = SHA256Handler(sha256).get()
 
     @property
-    def __should__(self):
-        _should = []
+    def __must__(self):
+        _must = []
         
         if self.md5 != "":
-            _should.append({"match": {"md5": self.md5}})
+            _must.append({"match": {"md5": self.md5}})
 
         if self.sha1 != "":
-            _should.append({"match": {"sha1": self.sha1}})
+            _must.append({"match": {"sha1": self.sha1}})
 
         if self.sha256 != "":
-            _should.append({"match": {"sha256": self.sha256}})
+            _must.append({"match": {"sha256": self.sha256}})
         
-        return _should
+        return _must
 
     def insert_if_not_exists_and_select(self):
         query = {
             "query": {
                 "bool": {
-                    "must": self.__should__
+                    "must": self.__must__
                 }
             }
         }
         
         hash = Hash.raw_search_one(body=query)
         
-        # print("AAAAAAAAAAA", hash, self.md5)
-
         if hash is None:
             self.session.add(self)
             self.session.commit()

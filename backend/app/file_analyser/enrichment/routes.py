@@ -54,8 +54,8 @@ class Enrichment(FlaskView):
                 tasks[task_id] = task.state
 
             elif task.state == 'FAILURE':
-                print(task)
-                # tasks[task_id] = task.state
+                # print("FAILURE!!!!!!!!!!!!!", task)
+                tasks[task_id] = task.state
             
             else:
                 tasks[task_id] = task.state

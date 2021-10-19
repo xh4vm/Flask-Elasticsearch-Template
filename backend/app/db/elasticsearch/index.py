@@ -43,8 +43,14 @@ class Index:
 
         return int(search['hits']['hits'][0]['_id']) if len(search['hits']['hits']) > 0 else None
 
-    def query(self, query : str, fields : List[str]) -> Tuple[list, int]:
-        search = current_app.elasticsearch.search(index=self.index,  
-            body={'query': {'multi_match': {'query': query, 'fields': fields}}})
+    def query(self, query : str, fields : List[str], search_type : str) -> Tuple[list, int]:
+        if search_type == "best_fields":
+            body = {'query': {'multi_match': {'query': query, 'fields': fields}}}
+        elif search_type == "fuzziness":
+            body = {'query': {'multi_match': {'query': query, 'fields': fields, "fuzziness": "auto"}}}
+        elif search_type == "bool_prefix":
+            body = {'query': {'multi_match': {'query': query, 'fields': fields, "type": search_type}}}
+        
+        search = current_app.elasticsearch.search(index=self.index, body=body)
 
         return [int(hit['_id']) for hit in search['hits']['hits']], search['hits']['total']

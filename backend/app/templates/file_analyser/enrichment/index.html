@@ -52,7 +52,10 @@
                     <tr class=" cursor-pointer">
                         <td class="text-center">{{ loop.index }}</td>
                         <td class="text-center task_id">{{ task_id }}</td>
-                        <td class="text-center" id="{{ task_id }}">{{ task_state }}</td>
+                        <td class="text-center" id="{{ task_id }}">
+                            <i class="fi {% if task_state == 'PENDING' %} fi-spin fi-circle-spin {% elif task_state == 'FAILURE' %} text-danger mdi-close {% else %} text-success mdi-check {% endif %}" role="status" aria-hidden="true"></i>
+                            <span class="d-none" >{{task_state}}</span>
+                        </td>
                     </tr>
                 {% endfor %}
         </tbody>

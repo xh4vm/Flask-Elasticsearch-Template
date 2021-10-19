@@ -49,9 +49,9 @@ class ElasticsearchMixin(object):
         return Index(cls.__tablename__).query_one(expression)
 
     @classmethod
-    def search(cls, expression : str, fields : List[str] = ['*']) -> Tuple[BaseQuery, int]:
+    def search(cls, expression : str, fields : List[str] = ['*'], search_type : str = "best_fields") -> Tuple[BaseQuery, int]:
         Index(cls.__tablename__).add_if_not_exists(cls)
-        ids, total = Index(cls.__tablename__).query(expression, fields)
+        ids, total = Index(cls.__tablename__).query(query=expression, fields=fields, search_type=search_type)
 
         # when = [(ids[i], i) for i in range(len(ids))]
 
@@ -59,9 +59,9 @@ class ElasticsearchMixin(object):
         return cls.query.filter(cls.id.in_(ids)).all(), total['value']
    
     @classmethod
-    def search_ids(cls, expression : str, fields : List[str] = ['*']) -> Tuple[BaseQuery, int]:
+    def search_ids(cls, expression : str, fields : List[str] = ['*'], search_type : str = "best_fields") -> Tuple[BaseQuery, int]:
         Index(cls.__tablename__).add_if_not_exists(cls)
-        return Index(cls.__tablename__).query(expression, fields)
+        return Index(cls.__tablename__).query(query=expression, fields=fields, search_type=search_type)
 
     @classmethod
     def before_commit(cls, session : dict) -> None:

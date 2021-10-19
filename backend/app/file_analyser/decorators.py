@@ -21,6 +21,17 @@ def fingerprint_required(f):
 
     return decorated_function
 
+def search_type_optional(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        search_type = request.args.get('search_type') or "best_fields"
+
+        kwargs['search_type'] = search_type
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 def object_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
