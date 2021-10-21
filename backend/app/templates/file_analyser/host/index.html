@@ -6,10 +6,22 @@
 
 
 {% block content %}
-    <section>
+<section class="bg-light py-4">
+    <div class="container">
+
+        <h1 class="h3">
+            Исследованные объекты
+        </h1>
+
+        {% include 'file_analyser/host/breadcrumbs.html' %}
+
+    </div>
+</section>
+    <div class="mt-3">
+        
         
         {% include 'file_analyser/host/search.html' %}
 
         {% include 'file_analyser/host/objects.html' %}
-    </section>
+    </div>
 {% endblock %}

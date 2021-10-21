@@ -19,6 +19,5 @@ class SearchObj(Parameter):
         return RedisClient.get_value(self.__parameter__) or ["objects", "hashes"]
 
     def b64_encode(self):
-        _ = self.search_obj if self.search_obj is not None else []
-        print(self.search_obj)
-        return b64encode(dumps(_).encode())
+        _ = self.search_obj if self.search_obj is not None else loads([])
+        return b64encode(_.encode())

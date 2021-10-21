@@ -82,17 +82,54 @@
                     <li class="clearfix mb-2">
                         <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
                             <i class="fi fi-check"></i>
-                        </div> <span class="text-primary">Реестр:</span> {{av_info.autostart_locations}}
+                        <!-- </div> <span class="text-primary">Реестр:</span> -->
+                        </div> 
+                        <a data-toggle="collapse" href="#reg" role="button" aria-expanded="false" aria-controls="reg">
+                            <span>Реестр:</span>
+                            <span class="group-icon">
+                                <i class="fi fi-arrow-end-slim"></i>
+                                <i class="fi fi-arrow-down-slim"></i>
+                            </span>
+                        </a>
+                        {% set locs = av_info.autostart_locations | fromjson %}
+                        {% if locs is not none %}
+                       
+                            <ul id="reg" class="collapse mt-1 list-group rounded overflow-hidden list-group-flush">
+                                {% for loc in locs %}
+                                <li class="list-group-item">
+                                    <div class="d-flex">
+
+                                        <div class="badge badge-secondary badge-soft badge-ico-sm rounded-circle float-start">
+                                            <i class="fi fi-minus"></i>
+                                        </div>
+
+                                        <div class="pl--12 pr--12">
+                                            <p class="text-dark m-0">
+                                                Location: {{loc['location']}}
+                                            </p>
+
+                                            <p class="m-0">
+                                                Entry: {{loc['entry']}}
+                                            </p>
+                                        </div>
+
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
                     </li>
                     <li class="clearfix mb-2">
                         <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
                             <i class="fi fi-check"></i>
-                        </div> <span class="text-primary">Теги:</span> {% for tag in av_info.popular_threat_name | fromjson %} {{tag['value']}} ({{tag['count']}}); {% endfor %}
+                            {% set tags = av_info.popular_threat_name | fromjson %}
+                        </div> <span class="text-primary">Теги:</span> {% if tags is not none %} {% for tag in tags %} {{tag['value']}} ({{tag['count']}}); {% endfor %} {% endif %}
                     </li>
                     <li class="clearfix mb-2">
                         <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
                             <i class="fi fi-check"></i>
-                        </div> <span class="text-primary">Категории:</span> {% for tag in av_info.popular_threat_category | fromjson %} {{tag['value']}} ({{tag['count']}}); {% endfor %}
+                            {% set categories = av_info.popular_threat_category | fromjson %}
+                        </div> <span class="text-primary">Категории:</span> {% if categories is not none %} {% for cat in categories %} {{cat['value']}} ({{cat['count']}}); {% endfor %} {% endif %}
                     </li>
                     <li class="clearfix mb-2">
                         <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">

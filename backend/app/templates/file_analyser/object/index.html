@@ -1,6 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<section class="bg-light py-4">
+    <div class="container">
+        <h1 class="h3">
+            Информация об объекте
+        </h1>
+
+        {% include 'file_analyser/object/breadcrumbs.html' %}
+
+    </div>
+</section>
+
     {% include 'file_analyser/object/av_header.html' %}
 
     {% include 'file_analyser/object/av_info.html' %}
