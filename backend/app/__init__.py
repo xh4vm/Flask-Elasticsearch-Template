@@ -4,6 +4,7 @@ from .extensions.flask_elastic import FlaskElastic
 from flask_migrate import Migrate
 from flask_redis import FlaskRedis
 from .db import db
+from .extensions.jinja2.filters import *
 
 
 migrate = Migrate()
@@ -17,6 +18,8 @@ def register_blueprints(app):
     from app.file_analyser import bp as file_analyser_bp
     app.register_blueprint(file_analyser_bp)
 
+def register_jinja2_filters(app):
+    app.jinja_env.filters.update({"fromjson": fromjson})
 
 def create_app(config_class=Config):
     app = FlaskElastic(__name__, config_class=config_class)
@@ -27,6 +30,7 @@ def create_app(config_class=Config):
     celery.conf.update(app.config)
 
     register_blueprints(app)
+    register_jinja2_filters(app)
 
     app.app_context().push()
 

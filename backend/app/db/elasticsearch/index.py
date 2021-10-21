@@ -45,7 +45,7 @@ class Index:
 
     def query(self, query : str, fields : List[str], search_type : str) -> Tuple[list, int]:
         if search_type == "best_fields":
-            body = {'query': {'multi_match': {'query': query, 'fields': fields}}}
+            body = {'query': {'query_string': {'query': query, 'fields': fields}}, "size": 10000}
         elif search_type == "fuzziness":
             body = {'query': {'multi_match': {'query': query, 'fields': fields, "fuzziness": "auto"}}}
         elif search_type == "bool_prefix":

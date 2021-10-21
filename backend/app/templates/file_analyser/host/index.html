@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 
+{% block breadcrumbs %}
+    {% include 'file_analyser/host/breadcrumbs.html' %}
+{% endblock breadcrumbs %}
+
+
 {% block content %}
     <section>
+        
         {% include 'file_analyser/host/search.html' %}
 
         {% include 'file_analyser/host/objects.html' %}

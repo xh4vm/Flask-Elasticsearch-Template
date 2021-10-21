@@ -6,7 +6,7 @@
         <ul class="pagination-custom list-unstyled">
 
             <li class="page-item d-inline-block ml--2 mr--2 {% if active_page == 1 %} disabled {% endif %}">
-                <a class="page-link bw--2" href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, page=active_page|int - 1) }}" tabindex="-1" aria-disabled="true">
+                <a class="page-link bw--2" href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, s=s, search_type=search_type, search_obj=search_obj_string, page=active_page|int - 1) }}" tabindex="-1" aria-disabled="true">
                     <i class="fi fi-arrow-start fs--11"></i>
                 </a>
             </li>
@@ -15,7 +15,7 @@
 
             {% if page_num  %}
             <li class="d-inline-block ml--2 mr--2 page-item {% if active_page == page_num %} active {% endif %}">
-                <a href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, page=page_num) }}"
+                <a href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, s=s, search_type=search_type, search_obj=search_obj_string, page=page_num) }}"
                     class="page-link cursor-pointer">
                     {{page_num}}
                 </a>
@@ -23,16 +23,16 @@
             {% else %}
             <li class="page-item d-inline-block ml--2 mr--2">
                 {% if loop.previtem >= objects.page %}
-                    <a href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, page=objects.page|int + 3) }}" class="page-link cursor-pointer">...</a>
+                    <a href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, s=s, search_type=search_type, search_obj=search_obj_string, page=objects.page|int + 3) }}" class="page-link cursor-pointer">...</a>
                 {% else %}
-                    <a href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, page=objects.page|int - 3) }}" class="page-link cursor-pointer">...</a>
+                    <a href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, s=s, search_type=search_type, search_obj=search_obj_string, page=objects.page|int - 3) }}" class="page-link cursor-pointer">...</a>
                 {% endif %}
             </li>
             {% endif %}
         {% endfor %}
 
             <li class="page-item d-inline-block ml--2 mr--2 {% if active_page == iter_pages | length %} disabled {% endif %}">
-                <a class="page-link bw--2" href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, page=active_page|int + 1) }}">
+                <a class="page-link bw--2" href="{{ url_for('file_analyser.FileAnalyser:by_fingerprint', fingerprint_id=fingerprint_id, s=s, search_type=search_type, search_obj=search_obj_string, page=active_page|int + 1) }}">
                     <i class="fi fi-arrow-end fs--11"></i>
                 </a>
             </li>

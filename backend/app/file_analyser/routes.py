@@ -1,4 +1,3 @@
-from app import redis_client
 import requests
 import json
 from ..db import db
@@ -18,6 +17,10 @@ from itertools import chain
 from .schemas import post_search_schema, get_search_schema
 from typing import Optional
 from base64 import b64decode
+from .utils.search import Search
+from app.utils.redis_client import RedisClient
+from .utils.search.parameter.search_type import SearchType
+from .utils.search.parameter.search_obj import SearchObj
 
 
 class FileAnalyser(FlaskView):
@@ -39,6 +42,7 @@ class FileAnalyser(FlaskView):
 
         return render_template("file_analyser/index.html", fingerprint_data=fingerprint_data), 200
 
+
     @fingerprint_required
     @object_required
     @route('/<int:fingerprint_id>/<int:object_id>/', methods=['GET'])
@@ -54,59 +58,20 @@ class FileAnalyser(FlaskView):
 
         return render_template("file_analyser/object/index.html", object=object, av_info=av_info, av_verdict=av_verdict), 200
 
-    @fingerprint_required
-    @route('/<int:fingerprint_id>/', methods=['GET'])
-    def by_fingerprint(self, fingerprint : Fingerprint):
-        per_page = 10
-        page = request.args.get('page', 1, type=int)
-        search_type = redis_client.get('search_type').decode() if redis_client.get('search_type') else "best_fields"
-
-        objects_with_status = (Object
-                    .query
-                    .with_entities(*Object.__table__.columns, Hash.md5, Hash.sha1, Hash.sha256, AVInfo.status)
-                    .filter(Object.fingerprint_id == fingerprint.id, Hash.id == Object.hash_id, AVInfo.id == HashAssociate.av_info_id,
-                        HashAssociate.hash_id == Object.hash_id))
-
-        objects = (Object
-                    .query
-                    .with_entities(*Object.__table__.columns, Hash.md5, Hash.sha1, Hash.sha256, null().label('status'))
-                    .filter(
-                        Object.fingerprint_id == fingerprint.id, Hash.id == Object.hash_id,
-                        ~Object.hash_id.in_(
-                            chain(*self.session.query(HashAssociate.hash_id).all())
-                        )
-                    )
-                    .union(objects_with_status)
-                    .paginate(page, per_page))
-
-        return render_template("file_analyser/host/index.html", objects=objects, fingerprint_id=fingerprint.id, search_type=search_type), 200
 
     @fingerprint_required
     @request_validation_required(schema=get_search_schema, req_type=Args)
-    @route('/<int:fingerprint_id>/search/', methods=['GET'])
-    def by_fingerprint_search(self, fingerprint : Fingerprint, validated_request : dict):
+    @route('/<int:fingerprint_id>/', methods=['GET'])
+    def by_fingerprint(self, fingerprint : Fingerprint, validated_request : dict):
         per_page = 10
-        page = request.args.get('page', 1, type=int)
-        
-        search_type = validated_request['search_type']
-        search_obj = json.loads(b64decode(validated_request['search_obj']))
+        page = validated_request.get('page') or 1
+        s = validated_request.get('s') or None
+        search_type = SearchType(validated_request).cache_and_get()
 
-        redis_client.set('search_type', search_type)
+        search_obj = SearchObj(validated_request)
+        search_obj_data = search_obj.cache_and_get()
 
-        _hash_result_search, th = Hash.search(expression=validated_request['s'], search_type=search_type)
-        _av_info_search, ti = AVInfo.search(expression=validated_request['s'], search_type=search_type)
-        _av_verdict_search, tv = AVVerdict.search(expression=validated_request['s'], search_type=search_type)
-
-        result_search, to = Object.search_ids(expression=validated_request['s'], search_type=search_type)
-        result_search.extend(list(chain(*[[o.id for o in h.object] for h in _hash_result_search])))
-        
-        result_search.extend([o.id for o in 
-            chain(*[h.object for h in 
-            chain(*[a.hashes for a in _av_info_search])])])
-
-        result_search.extend([o.id for o in 
-            chain(*[h.object for h in 
-            chain(*[a.hashes for a in _av_verdict_search])])])
+        search_ids = Search(s=s, search_type=search_type, search_obj=search_obj_data).get()
 
         objects_with_status = (Object
                     .query
@@ -116,7 +81,7 @@ class FileAnalyser(FlaskView):
                         Hash.id == Object.hash_id, 
                         AVInfo.id == HashAssociate.av_info_id,
                         HashAssociate.hash_id == Object.hash_id, 
-                        Object.id.in_(result_search)))
+                        Object.id.in_(search_ids) if search_ids is not None else 1==1))
 
         objects = (Object
                     .query
@@ -126,16 +91,19 @@ class FileAnalyser(FlaskView):
                         ~Object.hash_id.in_(
                             chain(*self.session.query(HashAssociate.hash_id).all())
                         ),
-                        Object.id.in_(result_search)
+                        Object.id.in_(search_ids) if search_ids is not None else 1==1
                     )
                     .union(objects_with_status)
                     .paginate(page, per_page))
 
-        return render_template("file_analyser/host/index.html", objects=objects, fingerprint_id=fingerprint.id, search_type=search_type), 200
+        return render_template("file_analyser/host/index.html", objects=objects, s=s, search_obj=search_obj_data,
+            fingerprint_id=fingerprint.id, search_type=search_type, search_obj_string=search_obj.b64_encode()), 200
+
 
     @route('/settings/', methods=['GET'])
     def settings(self):
         return render_template("file_analyser/settings.html"), 200
+
 
     @route('/settings/download/agent/<os>/<type_file>/', methods=['GET'], defaults={'arch': None})
     @route('/settings/download/agent/<os>/<type_file>/<arch>/', methods=['GET'])

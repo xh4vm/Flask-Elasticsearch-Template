@@ -87,12 +87,12 @@
                     <li class="clearfix mb-2">
                         <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
                             <i class="fi fi-check"></i>
-                        </div> <span class="text-primary">Теги:</span> {{av_info.popular_threat_name}}
+                        </div> <span class="text-primary">Теги:</span> {% for tag in av_info.popular_threat_name | fromjson %} {{tag['value']}} ({{tag['count']}}); {% endfor %}
                     </li>
                     <li class="clearfix mb-2">
                         <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
                             <i class="fi fi-check"></i>
-                        </div> <span class="text-primary">Категории:</span> {{av_info.popular_threat_category}}
+                        </div> <span class="text-primary">Категории:</span> {% for tag in av_info.popular_threat_category | fromjson %} {{tag['value']}} ({{tag['count']}}); {% endfor %}
                     </li>
                     <li class="clearfix mb-2">
                         <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
