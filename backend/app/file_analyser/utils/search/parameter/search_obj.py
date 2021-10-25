@@ -6,6 +6,7 @@ from app.utils.redis_client import RedisClient
 
 
 class SearchObj(Parameter):
+    __default__ = ["objects", "hashes"]
     
     def __init__(self, validated_request : Optional[Dict[str,str]] = None):
         _search_obj = validated_request.get(self.__parameter__) 
@@ -16,8 +17,8 @@ class SearchObj(Parameter):
         return loads(self.search_obj) if self.search_obj is not None else []
 
     def get(self):
-        return RedisClient.get_value(self.__parameter__) or ["objects", "hashes"]
+        return RedisClient.get_value(self.__parameter__) or self.__default__
 
     def b64_encode(self):
-        _ = self.search_obj if self.search_obj is not None else loads([])
+        _ = self.search_obj if self.search_obj is not None else dumps([])
         return b64encode(_.encode())

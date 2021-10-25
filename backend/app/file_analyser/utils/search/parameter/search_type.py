@@ -4,6 +4,7 @@ from app.utils.redis_client import RedisClient
 
 
 class SearchType(Parameter):
+    __default__ = "best_fields"
     
     def __init__(self, validated_request : Optional[Dict[str,str]] = None):
         self.search_type = validated_request.get(self.__parameter__) or RedisClient.get_value(self.__parameter__)
@@ -13,6 +14,6 @@ class SearchType(Parameter):
         return self.search_type
 
     def get(self):
-        return RedisClient.get_value(self.__parameter__) or "best_fields"
+        return RedisClient.get_value(self.__parameter__) or self.__default__
 
 

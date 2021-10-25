@@ -3,9 +3,18 @@ from .search_by_object import SearchByObject
 from .search_by_hash import SearchByHash
 from .search_by_av_info import SearchByAVInfo
 from .search_by_av_verdict import SearchByAVVerdict
+from itertools import chain
 
 
 class Search:
+    __associate__ = {
+        "objects" : SearchByObject,
+        "hashes" : SearchByHash,
+        "av_info" : SearchByAVInfo,
+        "av_verdict" : SearchByAVVerdict
+    }
+
+
     def __init__(self, s : Optional[str] = None, search_type : Optional[str] = None, search_obj : Optional[Dict[str, str]] = None):
         self.s = s
         self.search_type = search_type
