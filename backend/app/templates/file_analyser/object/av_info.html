@@ -1,0 +1,146 @@
+<section>
+    <div class="container">
+
+        <!-- job -->
+        <h3 class="h5 border-bottom pb-3 mb-4">
+            <span class="text-primary">VirusTotal.</span> Основная информация
+        </h3>
+
+        <p class="lead">
+            Антивирусный анализ с помощью сервиса VirusTotal
+        </p>
+
+        <div class="row col-border mt-5">
+            <div class="col-12 col-lg-6">
+
+                <h5 class="font-weight-light mb-3">Информация о файле</h5>
+
+                <ul class="list-unstyled list-icons mb-5">
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">Путь:</span> {{object.path}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">MD5 хеш:</span> {{object.hash.md5}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">SHA1 хеш:</span> {{object.hash.sha1}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">SHA256 хеш:</span> {{object.hash.sha256}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">Подпись:</span> {% if object.trusted %} <i class="text-success fi fi-mdeal"></i> {% else %} <i class="text-danger fi fi-bell-full-active"></i> {% endif %}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">Дата создания:</span> {{object.creation_time}}
+                    </li>
+
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-warning badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-round-lightning text-dark"></i>
+                        </div> <span class="text-primary">Дата модификации:</span> {{object.last_write_time}}
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <div class="col-12 col-lg-6">
+
+                <h5 class="font-weight-light mb-3">Информация о сигнатуре</h5>
+                
+                <ul class="list-unstyled list-icons mb-5">
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        </div> <span class="text-primary">Тип файла:</span> {{av_info.type_description}}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        </div> <span class="text-primary">Упаковщик:</span> {{av_info.packer}}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        <!-- </div> <span class="text-primary">Реестр:</span> -->
+                        </div> 
+                        <a data-toggle="collapse" href="#reg" role="button" aria-expanded="false" aria-controls="reg">
+                            <span>Реестр:</span>
+                            <span class="group-icon">
+                                <i class="fi fi-arrow-end-slim"></i>
+                                <i class="fi fi-arrow-down-slim"></i>
+                            </span>
+                        </a>
+                        {% set locs = av_info.autostart_locations | fromjson %}
+                        {% if locs is not none %}
+                       
+                            <ul id="reg" class="collapse mt-1 list-group rounded overflow-hidden list-group-flush">
+                                {% for loc in locs %}
+                                <li class="list-group-item">
+                                    <div class="d-flex">
+
+                                        <div class="badge badge-secondary badge-soft badge-ico-sm rounded-circle float-start">
+                                            <i class="fi fi-minus"></i>
+                                        </div>
+
+                                        <div class="pl--12 pr--12">
+                                            <p class="text-dark m-0">
+                                                Location: {{loc['location']}}
+                                            </p>
+
+                                            <p class="m-0">
+                                                Entry: {{loc['entry']}}
+                                            </p>
+                                        </div>
+
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                            {% set tags = av_info.popular_threat_name | fromjson %}
+                        </div> <span class="text-primary">Теги:</span> {% if tags is not none %} {% for tag in tags %} {{tag['value']}} ({{tag['count']}}); {% endfor %} {% endif %}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                            {% set categories = av_info.popular_threat_category | fromjson %}
+                        </div> <span class="text-primary">Категории:</span> {% if categories is not none %} {% for cat in categories %} {{cat['value']}} ({{cat['count']}}); {% endfor %} {% endif %}
+                    </li>
+                    <li class="clearfix mb-2">
+                        <div class="badge badge-success badge-soft badge-ico-sm rounded-circle float-start">
+                            <i class="fi fi-check"></i>
+                        </div> <span class="text-primary">Статус:</span> {% if av_info.status == 106107 %} <span class="text-danger">ВИРУС</span> {% elif av_info.status == 106103 %} <span class="text-warning">ПОДОЗРИТЕЛЬНЫЙ</span> {% elif av_info.status == 106108 %} <span class="text-secondary">ЗАРАЖЕНИЯ НЕ ОБНАРУЖЕНО</span> {% endif %}
+                    </li>
+
+                </ul>
+
+            </div>
+        </div>
+
+    </div>
+</section>

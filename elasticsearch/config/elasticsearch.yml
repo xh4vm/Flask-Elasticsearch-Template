@@ -9,6 +9,8 @@ network.host: 0.0.0.0
 # Details: https://github.com/elastic/elasticsearch/pull/17288
 discovery.zen.minimum_master_nodes: 1
 
+# action.auto_create_index: +fingerprints*, +hashes*, +not_verified_viruses*, +objects*, +hash_associates*, +av_infos*, +verdict_associates*, +av_verdicts*
+
 ## Use single node discovery in order to disable production mode and avoid bootstrap checks
 ## see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
 #

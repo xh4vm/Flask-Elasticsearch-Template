@@ -8,7 +8,6 @@ class FlaskElastic(Flask):
     def __init__(self, *args, **kwargs):
         config_class = kwargs['config_class']
         del kwargs['config_class']
-        print (config_class)
 
         super().__init__(*args, **kwargs)
 

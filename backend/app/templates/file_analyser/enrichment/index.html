@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="w-75 mx-auto p-5  bg-white shadow-xs rounded-xl text-gray-800">
+    <table class="table-datatable table table-bordered table-hover table-striped" 
+        data-lng-empty="Нет таких данных" 
+        data-lng-page-info="Показано с _START_ по _END_ из _TOTAL_ вхождений" 
+        data-lng-filtered="(filtered from _MAX_ total entries)" 
+        data-lng-loading="Загрузка..." 
+        data-lng-processing="В процессе..." 
+        data-lng-search="Поиск..." 
+        data-lng-norecords="Нет таких данных" 
+        data-lng-sort-ascending=": активирована сортировка по возрастанию" 
+        data-lng-sort-descending=": активирована сортировка по убыванию" 
+
+        data-lng-column-visibility="Выбор столбцов" 
+        data-lng-csv="CSV" 
+        data-lng-pdf="PDF" 
+        data-lng-xls="XLS" 
+        data-lng-copy="Copy" 
+        data-lng-print="Print" 
+        data-lng-all="All" 
+
+        data-main-search="true" 
+        data-column-search="false" 
+        data-row-reorder="false" 
+        data-col-reorder="true" 
+        data-responsive="true" 
+        data-header-fixed="true" 
+        data-select-onclick="true" 
+        data-enable-paging="true" 
+        data-enable-col-sorting="true" 
+        data-autofill="false" 
+        data-group="false" 
+        data-items-per-page="10" 
+
+        data-lng-export="<i class='fi fi-squared-dots fs--18 line-height-1'></i>" 
+        data-export-pdf-disable-mobile="true" 
+        data-export='["csv", "pdf", "xls"]' 
+        data-options='["copy", "print"]' 
+    >
+        <thead>
+            <tr>
+                <th scope="col" class="text-center">#</th>
+                <th scope="col" class="text-center">ID задачи</th>
+                <th scope="col" class="text-center">Статус задачи</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for task_id, task_state in tasks.items() %}
+                    <tr class=" cursor-pointer">
+                        <td class="text-center">{{ loop.index }}</td>
+                        <td class="text-center task_id">{{ task_id }}</td>
+                        <td class="text-center" id="{{ task_id }}">
+                            <i class="fi {% if task_state == 'PENDING' %} fi-spin fi-circle-spin {% elif task_state == 'FAILURE' %} text-danger mdi-close {% else %} text-success mdi-check {% endif %}" role="status" aria-hidden="true"></i>
+                            <span class="d-none" >{{task_state}}</span>
+                        </td>
+                    </tr>
+                {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+    <script src="{{url_for('static', filename='js/file_analyser/enrichment/index.js')}}"></script>
+{% endblock %}

@@ -1,0 +1,61 @@
+<section>
+    <div class="container">
+
+        <!-- job -->
+        <h3 class="h5 border-bottom pb-3 mb-4">
+            <span class="text-primary">VirusTotal.</span> Антивирусные отчеты
+        </h3>
+
+        <p class="lead">
+            Антивирусный анализ с помощью сервиса VirusTotal
+        </p>
+
+        <div class="row col-border mt-5">
+
+            {% for verdict in av_verdict %}
+                <div class="col-12 col-lg-4">
+
+                    <div class=" card shadow-md shadow-lg-hover transition-all-ease-250 transition-hover-top h-100 {% if verdict.category == 'malicious' %} border-danger {% elif verdict.category == 'suspicious' %} border-warning {% else %} border-primary {% endif %} bl-0 br-0 bb-0 bw--2">
+                        <div class="card-body">
+                            <h5 class="card-title">{{verdict.engine_name}}</h5>
+                            <p class="card-text">
+                                <ul class="list-unstyled list-icons mb-5">
+
+                                    <li class="clearfix mb-2">
+                                        <div class="badge badge-indigo badge-soft badge-ico-sm rounded-circle float-start">
+                                            <i class="fi fi-round-plus text-dark"></i>
+                                        </div> <span class="text-primary">Категория:</span> {{verdict.category}}
+                                    </li>
+
+                                    <li class="clearfix mb-2">
+                                        <div class="badge badge-indigo badge-soft badge-ico-sm rounded-circle float-start">
+                                            <i class="fi fi-round-plus text-dark"></i>
+                                        </div> <span class="text-primary">Результат:</span> {{verdict.result}}
+                                    </li>
+
+                                    <li class="clearfix mb-2">
+                                        <div class="badge badge-indigo badge-soft badge-ico-sm rounded-circle float-start">
+                                            <i class="fi fi-round-plus text-dark"></i>
+                                        </div> <span class="text-primary">Метод:</span> {{verdict.method}}
+                                    </li>
+
+                                    <li class="clearfix mb-2">
+                                        <div class="badge badge-indigo badge-soft badge-ico-sm rounded-circle float-start">
+                                            <i class="fi fi-round-plus text-dark"></i>
+                                        </div> <span class="text-primary">Обновлено:</span> {{verdict.engine_update}}
+                                    </li>
+
+                                </ul>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            {% endfor %}
+
+
+            </div>
+        </div>
+
+    </div>
+</section>

@@ -1,0 +1,125 @@
+<div class="container ">
+    <form 	id="search_objects"
+            action="/file_analyser/{{fingerprint_id}}/" 
+            method="GET" 
+            data-autosuggest="off" 
+            
+            data-mode="json" 
+            data-json-max-results='10'
+            data-json-related-item-icon='fi fi-star-empty'
+            data-json-highlight-term='true'
+            data-contentType='application/json; charset=utf-8'
+            data-dataType='json'
+
+            data-container="#sow-search-container" 
+            data-input-min-length="2" 
+            data-input-delay="250" 
+            data-related-keywords="" 
+            class="js-ajax-search sow-search sow-search-mobile-float d-flex-1-1-auto mx-5 m-0-xs">
+        <div class="sow-search-input w-100">
+
+            <div class="input-group-over d-flex align-items-center w-100 h-100 rounded form-control-pill">
+
+                <input placeholder="Хочешь что-то поискать?" aria-label="Хочешь что-то поискать?" name="s" type="text" class="form-control-sow-search form-control form-control-lg" value="" autocomplete="off">
+
+                <span class="sow-search-buttons">
+
+                    <button aria-label="Global Search" type="submit" class="btn shadow-none m-0 px-3 py-2 bg-transparent text-muted">
+                        <i class="fi fi-search fs--20 m-0"></i>
+                    </button>
+
+                    <a href="javascript:;" class="btn-sow-search-toggler btn btn-light shadow-none m-0 p-2 d-inline-block d-lg-none">
+                        <i class="fi fi-close fs--20 m-0"></i>
+                    </a>
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="sow-search-container w-100 p-0 hide shadow-md" id="sow-search-container">
+            <div class="sow-search-container-wrapper">
+
+                <div class="sow-search-loader p-3 text-center hide">
+                    <i class="fi fi-circle-spin fi-spin text-muted fs--30"></i>
+                </div>
+
+                <div class="sow-search-content rounded w-100 scrollable-vertical"></div>
+
+            </div>
+        </div>
+        
+        <div class="sow-search-backdrop overlay-dark opacity-3 hide"></div>
+
+        <div  class="row col-border container mt-3">
+
+            <div class="col-12 col-lg-6">
+
+                <label class="form-radio form-radio-primary form-radio-bordered">
+                    <input type="radio" {% if search_type == 'best_fields' %} checked {% endif %} name="search_type" value="best_fields">
+                    <i></i> Поиск по словам
+                </label>
+    
+                <label class="form-radio form-radio-primary form-radio-bordered">
+                    <input type="radio" {% if search_type == 'bool_prefix' %} checked {% endif %} name="search_type" value="bool_prefix">
+                    <i></i> Поиск по префиксу
+                </label>
+    
+                <label class="form-radio form-radio-primary form-radio-bordered">
+                    <input type="radio" {% if search_type == 'fuzziness' %} checked {% endif %} name="search_type" value="fuzziness">
+                    <i></i> Нечеткий поиск
+                </label>
+
+            </div>
+
+            <div class="col-12 col-lg-6 ">
+
+                <label class="form-checkbox form-checkbox-primary form-checkbox-bordered">
+                    <input type="checkbox" name="search_obj" {% if 'objects' in search_obj %} checked {% endif %} name="checkbox" value="objects">
+                    <i></i> Объекты
+                </label>
+    
+                <label class="form-checkbox form-checkbox-primary form-checkbox-bordered">
+                    <input type="checkbox" name="search_obj" {% if 'hashes' in search_obj %} checked {% endif %} name="checkbox" value="hashes">
+                    <i></i> Хеши
+                </label>
+    
+                <label class="form-checkbox form-checkbox-primary form-checkbox-bordered">
+                    <input type="checkbox" name="search_obj" {% if 'av_info' in search_obj %} checked {% endif %} name="checkbox" value="av_info">
+                    <i></i> АВ информация
+                </label>
+    
+                <label class="form-checkbox form-checkbox-primary form-checkbox-bordered">
+                    <input type="checkbox" name="search_obj" {% if 'av_verdict' in search_obj %} checked {% endif %} name="checkbox" value="av_verdict">
+                    <i></i> АВ вердикт
+                </label>
+
+            </div>
+
+        </div>
+
+    </form>
+</div>
+
+{% block additional_scripts %}
+    <script type="text/javascript">
+        const form = document.getElementById("search_objects");
+
+        const func = (e) => {
+            e.preventDefault();
+
+            let data = {
+                "s": document.querySelector("input[name='s']").value,
+                "search_type": document.querySelector("input[name='search_type']:checked").value,
+                "search_obj": btoa(JSON.stringify(Array.from(document.querySelectorAll("input[name='search_obj']:checked")).map(e => e.value)))
+            };
+
+
+            let searchParams = new URLSearchParams(data);
+            window.location.href = "/file_analyser/{{fingerprint_id}}/?"+searchParams.toString()
+        }
+
+        form.onsubmit = func
+    </script>
+{% endblock %}

@@ -1,23 +1,25 @@
 from celery import Celery
 from config import Config
 from .extensions.flask_elastic import FlaskElastic
-from .extensions.flask_celery import FlaskCelery
 from flask_migrate import Migrate
 from flask_redis import FlaskRedis
-import os
-
-
 from .db import db
+from .extensions.jinja2.filters import *
+
 
 migrate = Migrate()
 redis_client = FlaskRedis()
-# celery = Celery(__name__, backend=os.environ.get('CELERY_RESULT_BACKEND'), broker=os.environ.get('CELERY_BROKER_URL'))
-celery = Celery(__name__, backend=Config.CELERY_RESULT_BACKEND, broker=Config.CELERY_BROKER_URL)
+celery = Celery(__name__, backend=Config.RESULT_BACKEND, broker=Config.BROKER_URL)
 
 def register_blueprints(app):
-    from app.ntfs import bp as ntfs_bp
-    app.register_blueprint(ntfs_bp)
+    from app.home import bp as home_bp
+    app.register_blueprint(home_bp)
 
+    from app.file_analyser import bp as file_analyser_bp
+    app.register_blueprint(file_analyser_bp)
+
+def register_jinja2_filters(app):
+    app.jinja_env.filters.update({"fromjson": fromjson})
 
 def create_app(config_class=Config):
     app = FlaskElastic(__name__, config_class=config_class)
@@ -25,9 +27,10 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     redis_client.init_app(app)
-    # celery.init_app(app)
+    celery.conf.update(app.config)
 
     register_blueprints(app)
+    register_jinja2_filters(app)
 
     app.app_context().push()
 
@@ -37,10 +40,8 @@ def create_app(config_class=Config):
 def make_celery(app):
     celery = Celery(
         app.import_name,
-        # backend=os.environ.get('CELERY_RESULT_BACKEND'),
-        # broker=os.environ.get('CELERY_BROKER_URL')
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
+        backend=app.config['RESULT_BACKEND'],
+        broker=app.config['BROKER_URL']
     )
     celery.conf.update(app.config)
 
@@ -50,4 +51,5 @@ def make_celery(app):
                 return self.run(*args, **kwargs)
 
     celery.Task = ContextTask
+    celery.config_from_object(__name__)
     return celery
