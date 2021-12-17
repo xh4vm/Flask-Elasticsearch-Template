@@ -129,7 +129,8 @@ class Hash(Model, ElasticsearchMixin):
             }
         }
         
-        hash = Hash.raw_search_one(body=query)
+        # hash = Hash.raw_search_one(body=query)
+        hash = Hash.query.filter_by(md5=self.md5, sha1=self.sha1, sha256=self.sha256).first()
         
         if hash is None:
             self.session.add(self)
