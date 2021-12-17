@@ -11,7 +11,7 @@ class Verdict:
 
     def __init__(self, verdict_data : dict):
         self.verdict_data = verdict_data
-        self.attributes = verdict_data['data']['attributes']
+        self.attributes = self.verdict_data.get('data').get('attributes')
 
     ## TODO
     def _get_status(self) -> int:

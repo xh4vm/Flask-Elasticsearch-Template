@@ -4,7 +4,7 @@
                 <tr>
                     <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--10 text-center">#</th>
                     <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--200 text-center">Серийный номер</th>
-                    <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--200 text-center">Имя устройства</th>
+                    <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--200 text-center">Ассоциация</th>
                     <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--120 text-center">Имя компьютера</th>
                     <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--100 text-center">Сетевые конфигурации</th>
                     <th class="bb-0 text-gray-500 font-weight-normal fs--14 w--60 text-center">Собрано информации об объектах</th>
@@ -15,7 +15,7 @@
                 {% for fingerprint in fingerprint_data.items %}
                     <tr onclick="window.location.href = '/file_analyser/{{ fingerprint.id }}/'" id="{{ fingerprint.id }}" class="fingerprint cursor-pointer bg-primary-soft-hover transition-bg-ease-150 text-decoration-none">
                         <td class="text-center">{{loop.index}}</td>
-                        <td class="text-center">{{ fingerprint.serial_name }}</td>
+                        <td class="text-center">{{ fingerprint.serial_number }}</td>
                         <td class="text-center">{{ fingerprint.friendly_name }}</td>
                         <td class="text-center">{{ fingerprint.computer_name }}</td>
                         <td class="text-center">{{ fingerprint.net_settings }}</td>

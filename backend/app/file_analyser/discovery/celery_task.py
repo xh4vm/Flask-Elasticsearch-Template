@@ -15,7 +15,8 @@ def get_virustotal_verdict(hash : dict, vt_api_url : str, vt_headers : dict):
     if response.status_code == 404:
         return response.status_code
 
-    verdict = Verdict(verdict_data)
-    verdict.add_analysis_results(hash_id=id)
+    if verdict_data.get('data') is not None and verdict_data.get('data').get('attributes') is not None:
+        verdict = Verdict(verdict_data)
+        verdict.add_analysis_results(hash_id=id)
 
     return response.status_code
