@@ -15,7 +15,7 @@ from .celery_task import get_virustotal_verdict
 class Discovery(FlaskView):
     session: scoped_session = db.session
     vt_api_url = 'https://www.virustotal.com/api/v3/files'
-    vt_headers = {'x-apikey' : 'a13a8e8e39c0b2a66bbd36dc2256467a9e692ca471391fd26a7edd7b1bb1163e'}
+    vt_headers = {'x-apikey' : 'xxx'}
 
     
     @request_validation_required(schema=post_discovery_schema, req_type=JSON)
